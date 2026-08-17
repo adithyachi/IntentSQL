@@ -1,0 +1,764 @@
+﻿@model BizPulse.AI.POC.Models.DataExplorerViewModel
+
+@{
+    ViewData["Title"] = "Data Explorer";
+}
+
+<div class="container py-4">
+
+    <!-- ========================================================= -->
+    <!-- HEADER -->
+    <!-- ========================================================= -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h1 class="fw-bold mb-1">
+                IntentSQL Data Explorer
+            </h1>
+
+            <p class="text-muted mb-0">
+                Inspect the underlying database data available to IntentSQL.
+                This page is read-only.
+            </p>
+
+        </div>
+
+        <a asp-controller="Home"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+
+            ← Home
+
+        </a>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- CONTROLS -->
+    <!-- ========================================================= -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <form method="get"
+                  asp-controller="DataExplorer"
+                  asp-action="Index">
+
+                <div class="row g-3 align-items-end">
+
+                    <!-- TABLE -->
+
+                    <div class="col-md-5">
+
+                        <label class="form-label fw-semibold">
+                            Table
+                        </label>
+
+                        <select id="tableSelector"
+                                name="table"
+                                class="form-select">
+
+                            @foreach (var table in Model.AvailableTables)
+                            {
+                                if (table.Equals(
+                                Model.SelectedTable,
+                                StringComparison.OrdinalIgnoreCase))
+                                {
+                                    <option value="@table" selected>
+                                        @table
+                                    </option>
+                                }
+                                else
+                                {
+                                    <option value="@table">
+                                        @table
+                                    </option>
+                                }
+                            }
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- ROWS PER PAGE -->
+
+                    <div class="col-md-2">
+
+                        <label class="form-label fw-semibold">
+                            Rows per page
+                        </label>
+
+                        <select name="pageSize"
+                                class="form-select">
+
+                            @foreach (var size in new[] { 10, 25, 50, 100 })
+                            {
+                                if (size == Model.PageSize)
+                                {
+                                    <option value="@size" selected>
+                                        @size
+                                    </option>
+                                }
+                                else
+                                {
+                                    <option value="@size">
+                                        @size
+                                    </option>
+                                }
+                            }
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- SORT COLUMN -->
+
+                    <div class="col-md-3">
+
+                        <label class="form-label fw-semibold">
+                            Sort
+                        </label>
+
+                        <select id="sortColumnSelector"
+                                name="sortColumn"
+                                class="form-select">
+
+                            @foreach (var column in Model.Columns)
+                            {
+                                if (column.Equals(
+                                Model.SortColumn,
+                                StringComparison.OrdinalIgnoreCase))
+                                {
+                                    <option value="@column" selected>
+                                        @column
+                                    </option>
+                                }
+                                else
+                                {
+                                    <option value="@column">
+                                        @column
+                                    </option>
+                                }
+                            }
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- SHOW DATA -->
+
+                    <div class="col-md-2">
+
+                        <button type="submit"
+                                class="btn btn-primary w-100">
+
+                            Show Data
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <input type="hidden"
+                       name="sortDirection"
+                       value="@Model.SortDirection" />
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- TABLE INFORMATION -->
+    <!-- ========================================================= -->
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <div>
+
+            <h4 class="fw-bold mb-0">
+                @Model.SelectedTable
+            </h4>
+
+            <small class="text-muted">
+                @Model.TotalRows.ToString("N0") total rows
+            </small>
+
+        </div>
+
+        <div>
+
+            @if (Model.TotalRows > 0)
+            {
+                <span class="badge bg-secondary">
+
+                    Showing
+                    @Model.StartRow.ToString("N0")
+                    –
+                    @Model.EndRow.ToString("N0")
+                    of
+                    @Model.TotalRows.ToString("N0")
+
+                </span>
+            }
+            else
+            {
+                <span class="badge bg-secondary">
+                    No rows found
+                </span>
+            }
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- DATA GRID -->
+    <!-- ========================================================= -->
+
+    <div class="card shadow-sm">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover table-striped mb-0 data-grid">
+
+                <!-- ================================================= -->
+                <!-- HEADER -->
+                <!-- ================================================= -->
+
+                <thead class="table-dark">
+
+                    <tr>
+
+                        @foreach (var column in Model.Columns)
+                        {
+                            var isCurrentSort =
+                            column.Equals(
+                            Model.SortColumn,
+                            StringComparison.OrdinalIgnoreCase);
+
+                            var nextDirection =
+                            isCurrentSort &&
+                            Model.SortDirection == "asc"
+                            ? "desc"
+                            : "asc";
+
+                            <th>
+
+                                <a class="sort-link"
+                                   asp-controller="DataExplorer"
+                                   asp-action="Index"
+                                   asp-route-table="@Model.SelectedTable"
+                                   asp-route-page="1"
+                                   asp-route-pageSize="@Model.PageSize"
+                                   asp-route-sortColumn="@column"
+                                   asp-route-sortDirection="@nextDirection">
+
+                                    @column
+
+                                    @if (isCurrentSort)
+                                    {
+                                        if (Model.SortDirection == "asc")
+                                        {
+                                            <span>▲</span>
+                                        }
+                                        else
+                                        {
+                                            <span>▼</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="sort-neutral">
+                                            ↕
+                                        </span>
+                                    }
+
+                                </a>
+
+                            </th>
+                        }
+
+                    </tr>
+
+
+                    <!-- ================================================= -->
+                    <!-- FILTER ROW -->
+                    <!-- ================================================= -->
+
+                    <tr class="filter-row">
+
+                        @foreach (var column in Model.Columns)
+                        {
+                            var currentFilter =
+                            Model.Filters.TryGetValue(
+                            column,
+                            out var value)
+                            ? value
+                            : string.Empty;
+
+                            <th>
+
+                                <input type="text"
+                                       name="filters[@column]"
+                                       value="@currentFilter"
+                                       form="filterForm"
+                                       class="form-control form-control-sm"
+                                       placeholder="Filter..." />
+
+                            </th>
+                        }
+
+                    </tr>
+
+                </thead>
+
+
+                <!-- ================================================= -->
+                <!-- DATA -->
+                <!-- ================================================= -->
+
+                <tbody>
+
+                    @if (Model.Rows.Count == 0)
+                    {
+                        <tr>
+
+                            <td colspan="@Model.Columns.Count"
+                                class="text-center py-5 text-muted">
+
+                                No matching rows found.
+
+                            </td>
+
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var row in Model.Rows)
+                        {
+                            <tr>
+
+                                @foreach (var column in Model.Columns)
+                                {
+                                    var value =
+                                    row.TryGetValue(
+                                    column,
+                                    out var cellValue)
+                                    ? cellValue
+                                    : null;
+
+                                    <td>
+                                        @FormatValue(value)
+                                    </td>
+                                }
+
+                            </tr>
+                        }
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- ========================================================= -->
+        <!-- FILTER CONTROLS -->
+        <!-- ========================================================= -->
+
+        <div class="card-footer bg-white">
+
+            <form id="filterForm"
+                  method="get"
+                  asp-controller="DataExplorer"
+                  asp-action="Index">
+
+                <input type="hidden"
+                       name="table"
+                       value="@Model.SelectedTable" />
+
+                <input type="hidden"
+                       name="page"
+                       value="1" />
+
+                <input type="hidden"
+                       name="pageSize"
+                       value="@Model.PageSize" />
+
+                <input type="hidden"
+                       name="sortColumn"
+                       value="@Model.SortColumn" />
+
+                <input type="hidden"
+                       name="sortDirection"
+                       value="@Model.SortDirection" />
+
+
+                <div class="d-flex justify-content-between align-items-center">
+
+                    <button type="submit"
+                            class="btn btn-primary btn-sm">
+
+                        Apply Filters
+
+                    </button>
+
+
+                    <a asp-controller="DataExplorer"
+                       asp-action="Index"
+                       asp-route-table="@Model.SelectedTable"
+                       class="btn btn-outline-secondary btn-sm">
+
+                        Clear Filters
+
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- PAGINATION -->
+    <!-- ========================================================= -->
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="mt-4">
+
+            <ul class="pagination justify-content-center">
+
+                <!-- PREVIOUS -->
+
+                <li class="page-item @(Model.Page <= 1 ? "disabled" : "")">
+
+                    <a class="page-link"
+                       asp-controller="DataExplorer"
+                       asp-action="Index"
+                       asp-route-table="@Model.SelectedTable"
+                       asp-route-page="@(Model.Page - 1)"
+                       asp-route-pageSize="@Model.PageSize"
+                       asp-route-sortColumn="@Model.SortColumn"
+                       asp-route-sortDirection="@Model.SortDirection">
+
+                        Previous
+
+                    </a>
+
+                </li>
+
+
+                <!-- PAGE NUMBERS -->
+                @for (var pageNumber = 1;
+               pageNumber <= Model.TotalPages;
+               pageNumber++)
+                {
+                    <li class="page-item @(pageNumber == Model.Page ? "active" : "")">
+
+                        <a class="page-link"
+                           asp-controller="DataExplorer"
+                           asp-action="Index"
+                           asp-route-table="@Model.SelectedTable"
+                           asp-route-page="@pageNumber"
+                           asp-route-pageSize="@Model.PageSize"
+                           asp-route-sortColumn="@Model.SortColumn"
+                           asp-route-sortDirection="@Model.SortDirection">
+
+                            @pageNumber
+
+                        </a>
+
+                    </li>
+                }
+
+
+                <!-- NEXT -->
+
+                <li class="page-item @(Model.Page >= Model.TotalPages ? "disabled" : "")">
+
+                    <a class="page-link"
+                       asp-controller="DataExplorer"
+                       asp-action="Index"
+                       asp-route-table="@Model.SelectedTable"
+                       asp-route-page="@(Model.Page + 1)"
+                       asp-route-pageSize="@Model.PageSize"
+                       asp-route-sortColumn="@Model.SortColumn"
+                       asp-route-sortDirection="@Model.SortDirection">
+
+                        Next
+
+                    </a>
+
+                </li>
+
+            </ul>
+
+        </nav>
+    }
+
+</div>
+
+
+<!-- ============================================================= -->
+<!-- JAVASCRIPT -->
+<!-- ============================================================= -->
+
+<script>
+
+    /*
+     * Maps each allowed database table to its columns.
+     *
+     * This is only used for updating the Sort dropdown.
+     * It does NOT query the database.
+     */
+    const tableColumns = {
+
+        categories: [
+            "Id",
+            "Name"
+        ],
+
+        customers: [
+            "Id",
+            "Name",
+            "Email",
+            "City",
+            "Country"
+        ],
+
+        orders: [
+            "Id",
+            "CustomerId",
+            "OrderDate",
+            "Status"
+        ],
+
+        order_items: [
+            "Id",
+            "OrderId",
+            "ProductId",
+            "Quantity",
+            "UnitPrice"
+        ],
+
+        products: [
+            "Id",
+            "Name",
+            "CategoryId",
+            "Price",
+            "CostPrice"
+        ]
+
+    };
+
+
+    const tableSelector =
+        document.getElementById("tableSelector");
+
+    const sortColumnSelector =
+        document.getElementById("sortColumnSelector");
+
+
+    /*
+     * When the table changes:
+     *
+     * 1. Do NOT submit the form.
+     * 2. Do NOT reload the grid.
+     * 3. Only update the Sort dropdown.
+     */
+    tableSelector.addEventListener(
+        "change",
+        function () {
+
+            const selectedTable =
+                this.value;
+
+            const columns =
+                tableColumns[selectedTable] || [];
+
+
+            /*
+             * Remember the current sort column.
+             */
+            const currentSort =
+                sortColumnSelector.value;
+
+
+            /*
+             * Remove the old column options.
+             */
+            sortColumnSelector.innerHTML = "";
+
+
+            /*
+             * Add the columns belonging
+             * to the newly selected table.
+             */
+            columns.forEach(
+                function (column) {
+
+                    const option =
+                        document.createElement("option");
+
+                    option.value =
+                        column;
+
+                    option.textContent =
+                        column;
+
+                    sortColumnSelector.appendChild(
+                        option);
+
+                });
+
+
+            /*
+             * If the currently selected sort column
+             * exists in the new table, keep it.
+             *
+             * Otherwise select the first column.
+             */
+            if (columns.includes(currentSort)) {
+
+                sortColumnSelector.value =
+                    currentSort;
+
+            }
+            else if (columns.length > 0) {
+
+                sortColumnSelector.value =
+                    columns[0];
+
+            }
+
+        });
+
+</script>
+
+
+<!-- ============================================================= -->
+<!-- VALUE FORMATTING -->
+<!-- ============================================================= -->
+@functions {
+
+    private static string FormatValue(object? value)
+    {
+        if (value == null)
+        {
+            return "NULL";
+        }
+
+        if (value is DateTime dateTime)
+        {
+            return dateTime.ToString(
+                "yyyy-MM-dd HH:mm:ss");
+        }
+
+        if (value is DateTimeOffset dateTimeOffset)
+        {
+            return dateTimeOffset.ToString(
+                "yyyy-MM-dd HH:mm:ss zzz");
+        }
+
+        if (value is decimal decimalValue)
+        {
+            return decimalValue.ToString("N2");
+        }
+
+        return value.ToString() ?? string.Empty;
+    }
+
+}
+
+
+<style>
+
+    /* ============================================================= */
+    /* DATA GRID */
+    /* ============================================================= */
+
+    .data-grid {
+        font-size: 0.9rem;
+    }
+
+        .data-grid th {
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+
+        .data-grid td {
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+
+    /* ============================================================= */
+    /* SORT LINKS */
+    /* ============================================================= */
+
+    .sort-link {
+        color: white;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+        .sort-link:hover {
+            color: white;
+            text-decoration: underline;
+        }
+
+    .sort-neutral {
+        opacity: 0.45;
+        font-size: 0.75rem;
+    }
+
+
+    /* ============================================================= */
+    /* FILTER ROW */
+    /* ============================================================= */
+
+    .filter-row th {
+        background-color: #343a40;
+        padding: 6px;
+    }
+
+    .filter-row input {
+        min-width: 90px;
+    }
+
+
+    /* ============================================================= */
+    /* SCROLLABLE GRID */
+    /* ============================================================= */
+
+    .table-responsive {
+        max-height: 650px;
+        overflow: auto;
+    }
+
+        .table-responsive thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+</style>

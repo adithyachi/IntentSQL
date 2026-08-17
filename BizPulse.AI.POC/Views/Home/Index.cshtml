@@ -1,0 +1,481 @@
+﻿@{
+    ViewData["Title"] = "IntentSQL";
+}
+
+<div class="container-fluid py-4">
+
+    @* =========================================================
+    INTENTSQL HERO
+    ========================================================= *@
+
+    <div class="card intent-hero shadow-sm border-0 mb-4">
+
+        <div class="card-body p-4 p-xl-5">
+
+            <div class="row align-items-center">
+
+                <div class="col-lg-8">
+
+                    <div class="text-uppercase small fw-semibold text-primary mb-2">
+                        Natural Language → Data
+                    </div>
+
+                    <h1 class="display-4 fw-bold mb-3">
+                        IntentSQL
+                    </h1>
+
+                    <p class="lead text-muted mb-3">
+                        Ask questions about your business data in plain English.
+                        IntentSQL understands your question, translates it into
+                        a database query, and returns the information you need.
+                    </p>
+
+                    <p class="text-muted mb-0">
+                        No SQL knowledge required. Just ask what you want to know.
+                    </p>
+
+                </div>
+
+
+                @* =====================================================
+                PRIMARY ACTION
+                ===================================================== *@
+
+                <div class="col-lg-4 mt-4 mt-lg-0 text-lg-end">
+
+                    <a asp-controller="AiTest"
+                       asp-action="Ask"
+                       class="btn btn-primary btn-lg intent-ask-button px-4 py-3">
+
+                        <span class="me-2">
+                            💬
+                        </span>
+
+                        Ask IntentSQL
+
+                    </a>
+
+                    <div class="small text-muted mt-2">
+                        Explore your business data using natural language
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            @* =====================================================
+            EXAMPLE QUESTIONS
+            ===================================================== *@
+
+            <div class="row g-2 mt-4 pt-4 border-top">
+
+                <div class="col-md-4">
+
+                    <div class="hero-example">
+
+                        <span>→</span>
+
+                        Which 5 products generated the most revenue from completed orders this calendar year?
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <div class="hero-example">
+
+                        <span>→</span>
+
+                        Which customer city has the highest number of customers?
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <div class="hero-example">
+
+                        <span>→</span>
+
+                        Which product category has the most products?
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    @* =========================================================
+    WHAT IS INTENTSQL
+    ========================================================= *@
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-lg-7">
+
+            <div class="card shadow-sm border-0 h-100">
+
+                <div class="card-body p-4">
+
+                    <div class="text-uppercase small fw-semibold text-primary mb-2">
+                        Natural Language Understanding
+                    </div>
+
+                    <h3 class="fw-bold mb-3">
+                        Ask questions. Get answers.
+                    </h3>
+
+                    <p class="text-muted">
+                        IntentSQL allows business users to interact with
+                        relational data using natural language instead of
+                        writing SQL queries manually.
+                    </p>
+
+                    <p class="text-muted mb-0">
+                        The agent interprets the intent behind a question,
+                        considers the available database structure, generates
+                        the required SQL, and returns the resulting data.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-lg-5">
+
+            <div class="card shadow-sm border-0 h-100">
+
+                <div class="card-body p-4">
+
+                    <h5 class="fw-bold mb-3">
+                        How it works
+                    </h5>
+
+                    <div class="home-flow">
+
+                        <div class="home-flow-step">
+
+                            <span class="home-flow-number">
+                                1
+                            </span>
+
+                            <span>
+                                Ask a business question
+                            </span>
+
+                        </div>
+
+
+                        <div class="home-flow-step">
+
+                            <span class="home-flow-number">
+                                2
+                            </span>
+
+                            <span>
+                                Intent is understood
+                            </span>
+
+                        </div>
+
+
+                        <div class="home-flow-step">
+
+                            <span class="home-flow-number">
+                                3
+                            </span>
+
+                            <span>
+                                SQL is generated
+                            </span>
+
+                        </div>
+
+
+                        <div class="home-flow-step">
+
+                            <span class="home-flow-number">
+                                4
+                            </span>
+
+                            <span>
+                                Results are returned
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    @* =========================================================
+    EXAMPLE USE CASES
+    ========================================================= *@
+
+    <div class="card shadow-sm border-0 mb-4">
+
+        <div class="card-body p-4">
+
+            <div class="text-uppercase small fw-semibold text-primary mb-2">
+                Business Questions
+            </div>
+
+            <h3 class="fw-bold mb-1">
+                What can you ask?
+            </h3>
+
+            <p class="text-muted mb-4">
+                Ask questions across customers, products, orders,
+                revenue, and other business data.
+            </p>
+
+
+            <div class="row g-3">
+
+                <div class="col-md-6 col-xl-3">
+
+                    <div class="use-case-card">
+
+                        <div class="use-case-icon">
+                            💰
+                        </div>
+
+                        <h6 class="fw-bold">
+                            Revenue & Sales
+                        </h6>
+
+                        <p class="small text-muted mb-0">
+                            Revenue trends, top products, sales comparisons,
+                            and order performance.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-6 col-xl-3">
+
+                    <div class="use-case-card">
+
+                        <div class="use-case-icon">
+                            👥
+                        </div>
+
+                        <h6 class="fw-bold">
+                            Customers
+                        </h6>
+
+                        <p class="small text-muted mb-0">
+                            Customer activity, purchasing behavior,
+                            and lifetime spending.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-6 col-xl-3">
+
+                    <div class="use-case-card">
+
+                        <div class="use-case-icon">
+                            📦
+                        </div>
+
+                        <h6 class="fw-bold">
+                            Products
+                        </h6>
+
+                        <p class="small text-muted mb-0">
+                            Product performance, rankings,
+                            and category-level analysis.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-6 col-xl-3">
+
+                    <div class="use-case-card">
+
+                        <div class="use-case-icon">
+                            📈
+                        </div>
+
+                        <h6 class="fw-bold">
+                            Business Analysis
+                        </h6>
+
+                        <p class="small text-muted mb-0">
+                            Comparisons, trends, rankings,
+                            and other analytical questions.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<style>
+
+    /* =============================================================
+           HERO
+           ============================================================= */
+
+    .intent-hero {
+        background: linear-gradient( 135deg, #f8fbff 0%, #ffffff 55%, #f4f8ff 100% );
+        border: 1px solid #dce8f7 !important;
+    }
+
+
+        .intent-hero h1 {
+            letter-spacing: -1px;
+        }
+
+
+    /* =============================================================
+           ASK INTENTSQL BUTTON
+           ============================================================= */
+
+    .intent-ask-button {
+        font-size: 1.05rem;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.18);
+        transition: all 0.2s ease;
+    }
+
+
+        .intent-ask-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 18px rgba(13, 110, 253, 0.25);
+        }
+
+
+    /* =============================================================
+           HERO EXAMPLES
+           ============================================================= */
+
+    .hero-example {
+        height: 100%;
+        padding: 12px 14px;
+        background-color: white;
+        border: 1px solid #e3eaf2;
+        border-radius: 6px;
+        color: #495057;
+        font-size: 0.85rem;
+        line-height: 1.45;
+    }
+
+
+        .hero-example span {
+            color: #0d6efd;
+            font-weight: 600;
+            margin-right: 5px;
+        }
+
+
+    /* =============================================================
+           HOME FLOW
+           ============================================================= */
+
+    .home-flow {
+        display: flex;
+        flex-direction: column;
+        gap: 13px;
+    }
+
+
+    .home-flow-step {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #495057;
+        font-size: 0.9rem;
+    }
+
+
+    .home-flow-number {
+        width: 27px;
+        height: 27px;
+        min-width: 27px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background-color: #0d6efd;
+        color: white;
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+
+
+    /* =============================================================
+           USE CASES
+           ============================================================= */
+
+    .use-case-card {
+        height: 100%;
+        padding: 18px;
+        border: 1px solid #e1e8f0;
+        border-radius: 8px;
+        background-color: #fafbfd;
+    }
+
+
+    .use-case-icon {
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 12px;
+        border-radius: 8px;
+        background-color: #e7f1ff;
+        font-size: 1.1rem;
+    }
+
+
+    /* =============================================================
+           RESPONSIVE
+           ============================================================= */
+
+    @@media (max-width: 767.98px) {
+
+        .intent-hero {
+            padding: 0;
+        }
+    }
+
+</style>

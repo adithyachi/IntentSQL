@@ -1,0 +1,20 @@
+services:
+
+  postgres:
+    image: postgres:17
+    container_name: bizpulse-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: bizpulse
+      POSTGRES_USER: bizpulse
+      POSTGRES_PASSWORD: bizpulse_dev_password
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

@@ -1,0 +1,21 @@
+# ============================================================
+# MIGRATION IMAGE
+# ============================================================
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0
+
+WORKDIR /src
+
+COPY ["BizPulse.AI.POC/BizPulse.AI.POC.csproj", "BizPulse.AI.POC/"]
+
+RUN dotnet restore "BizPulse.AI.POC/BizPulse.AI.POC.csproj"
+
+COPY . .
+
+RUN dotnet tool install --global dotnet-ef --version 8.0.20
+
+ENV PATH="$PATH:/root/.dotnet/tools"
+
+WORKDIR "/src/BizPulse.AI.POC"
+
+ENTRYPOINT ["dotnet", "ef", "database", "update"]

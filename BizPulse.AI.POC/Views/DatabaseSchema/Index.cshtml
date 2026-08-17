@@ -1,0 +1,616 @@
+﻿@{
+    ViewData["Title"] = "Database Schema";
+}
+
+<div class="container-fluid py-4">
+
+    <!-- ========================================================= -->
+    <!-- HEADER -->
+    <!-- ========================================================= -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <div class="text-uppercase small fw-semibold text-primary mb-2">
+                IntentSQL Data Model
+            </div>
+
+            <h1 class="fw-bold mb-2">
+                Database Schema
+            </h1>
+
+            <p class="text-muted mb-0">
+                The tables and relationships available to IntentSQL when
+                answering natural-language business questions.
+            </p>
+
+        </div>
+
+
+        <div class="d-flex gap-2">
+
+            <a asp-controller="DataExplorer"
+               asp-action="Index"
+               class="btn btn-outline-primary">
+
+                🗄️ Data Explorer
+
+            </a>
+
+            <a asp-controller="AiTest"
+               asp-action="Ask"
+               class="btn btn-primary">
+
+                💬 Ask IntentSQL
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- SCHEMA OVERVIEW -->
+    <!-- ========================================================= -->
+
+    <div class="card shadow-sm border-0 mb-4">
+
+        <div class="card-body p-4">
+
+            <div class="d-flex align-items-start gap-3">
+
+                <div class="schema-info-icon">
+                    ℹ
+                </div>
+
+                <div>
+
+                    <h5 class="fw-bold mb-1">
+                        How IntentSQL uses the schema
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        IntentSQL uses the available tables, columns, and
+                        relationships to understand which data is relevant
+                        to a business question and generate the appropriate
+                        SQL query.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- TABLES -->
+    <!-- ========================================================= -->
+
+    <div class="row g-4">
+
+
+        <!-- ========================================================= -->
+        <!-- CATEGORIES -->
+        <!-- ========================================================= -->
+
+        <div class="col-md-6 col-xl-4">
+
+            <div class="schema-table schema-blue">
+
+                <div class="schema-header">
+                    <span>categories</span>
+                    <span class="table-type">
+                        Table
+                    </span>
+                </div>
+
+                <div class="schema-body">
+
+                    <div class="schema-column">
+                        <strong>Id</strong>
+                        <span class="badge bg-secondary">PK</span>
+                    </div>
+
+                    <div class="schema-column">
+                        Name
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ========================================================= -->
+        <!-- PRODUCTS -->
+        <!-- ========================================================= -->
+
+        <div class="col-md-6 col-xl-4">
+
+            <div class="schema-table schema-blue">
+
+                <div class="schema-header">
+                    <span>products</span>
+                    <span class="table-type">
+                        Table
+                    </span>
+                </div>
+
+                <div class="schema-body">
+
+                    <div class="schema-column">
+                        <strong>Id</strong>
+                        <span class="badge bg-secondary">PK</span>
+                    </div>
+
+                    <div class="schema-column">
+                        Name
+                    </div>
+
+                    <div class="schema-column">
+                        <strong>CategoryId</strong>
+                        <span class="badge bg-warning text-dark">FK</span>
+                    </div>
+
+                    <div class="schema-column">
+                        Price
+                    </div>
+
+                    <div class="schema-column">
+                        CostPrice
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ========================================================= -->
+        <!-- CUSTOMERS -->
+        <!-- ========================================================= -->
+
+        <div class="col-md-6 col-xl-4">
+
+            <div class="schema-table schema-green">
+
+                <div class="schema-header">
+                    <span>customers</span>
+                    <span class="table-type">
+                        Table
+                    </span>
+                </div>
+
+                <div class="schema-body">
+
+                    <div class="schema-column">
+                        <strong>Id</strong>
+                        <span class="badge bg-secondary">PK</span>
+                    </div>
+
+                    <div class="schema-column">
+                        Name
+                    </div>
+
+                    <div class="schema-column">
+                        Email
+                    </div>
+
+                    <div class="schema-column">
+                        City
+                    </div>
+
+                    <div class="schema-column">
+                        Country
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ========================================================= -->
+        <!-- ORDERS -->
+        <!-- ========================================================= -->
+
+        <div class="col-md-6 col-xl-6">
+
+            <div class="schema-table schema-yellow">
+
+                <div class="schema-header">
+                    <span>orders</span>
+                    <span class="table-type">
+                        Table
+                    </span>
+                </div>
+
+                <div class="schema-body">
+
+                    <div class="schema-column">
+                        <strong>Id</strong>
+                        <span class="badge bg-secondary">PK</span>
+                    </div>
+
+                    <div class="schema-column">
+                        <strong>CustomerId</strong>
+                        <span class="badge bg-warning text-dark">FK</span>
+                    </div>
+
+                    <div class="schema-column">
+                        OrderDate
+                    </div>
+
+                    <div class="schema-column">
+                        Status
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ========================================================= -->
+        <!-- ORDER ITEMS -->
+        <!-- ========================================================= -->
+
+        <div class="col-md-6 col-xl-6">
+
+            <div class="schema-table schema-red">
+
+                <div class="schema-header">
+                    <span>order_items</span>
+                    <span class="table-type">
+                        Table
+                    </span>
+                </div>
+
+                <div class="schema-body">
+
+                    <div class="schema-column">
+                        <strong>Id</strong>
+                        <span class="badge bg-secondary">PK</span>
+                    </div>
+
+                    <div class="schema-column">
+                        <strong>OrderId</strong>
+                        <span class="badge bg-warning text-dark">FK</span>
+                    </div>
+
+                    <div class="schema-column">
+                        <strong>ProductId</strong>
+                        <span class="badge bg-warning text-dark">FK</span>
+                    </div>
+
+                    <div class="schema-column">
+                        Quantity
+                    </div>
+
+                    <div class="schema-column">
+                        UnitPrice
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- KEY -->
+    <!-- ========================================================= -->
+
+    <div class="card shadow-sm border-0 mt-4">
+
+        <div class="card-body p-4">
+
+            <h5 class="fw-bold mb-3">
+                Schema Relationships
+            </h5>
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+
+                    <div class="relationship">
+
+                        <code>products.CategoryId</code>
+
+                        <span>→</span>
+
+                        <code>categories.Id</code>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-6">
+
+                    <div class="relationship">
+
+                        <code>orders.CustomerId</code>
+
+                        <span>→</span>
+
+                        <code>customers.Id</code>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-6">
+
+                    <div class="relationship">
+
+                        <code>order_items.OrderId</code>
+
+                        <span>→</span>
+
+                        <code>orders.Id</code>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-6">
+
+                    <div class="relationship">
+
+                        <code>order_items.ProductId</code>
+
+                        <span>→</span>
+
+                        <code>products.Id</code>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- ACTION -->
+    <!-- ========================================================= -->
+
+    <div class="schema-action mt-4">
+
+        <div>
+
+            <h5 class="fw-bold mb-1">
+                Ready to explore the data?
+            </h5>
+
+            <p class="text-muted mb-0">
+                Ask IntentSQL a question or inspect the underlying records
+                using the Data Explorer.
+            </p>
+
+        </div>
+
+        <div class="d-flex gap-2">
+
+            <a asp-controller="DataExplorer"
+               asp-action="Index"
+               class="btn btn-outline-primary">
+
+                🗄️ Data Explorer
+
+            </a>
+
+            <a asp-controller="AiTest"
+               asp-action="Ask"
+               class="btn btn-primary">
+
+                💬 Ask IntentSQL
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<style>
+
+    /* =============================================================
+           INFO
+           ============================================================= */
+
+    .schema-info-icon {
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+        border-radius: 50%;
+        background-color: #e7f1ff;
+        color: #0d6efd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+    }
+
+
+    /* =============================================================
+           SCHEMA TABLE
+           ============================================================= */
+
+    .schema-table {
+        height: 100%;
+        overflow: hidden;
+        background-color: white;
+        border: 1px solid;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    }
+
+
+    .schema-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 15px;
+        color: white;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+
+    .table-type {
+        font-size: 0.7rem;
+        font-weight: 500;
+        opacity: 0.8;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+
+    .schema-body {
+        padding: 10px 15px;
+    }
+
+
+    .schema-column {
+        min-height: 34px;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        border-bottom: 1px solid #f0f2f4;
+        color: #495057;
+        font-size: 0.9rem;
+    }
+
+
+        .schema-column:last-child {
+            border-bottom: none;
+        }
+
+
+    /* =============================================================
+           TABLE COLORS
+           ============================================================= */
+
+    .schema-blue {
+        border-color: #0d6efd;
+    }
+
+
+        .schema-blue .schema-header {
+            background-color: #0d6efd;
+        }
+
+
+    .schema-green {
+        border-color: #198754;
+    }
+
+
+        .schema-green .schema-header {
+            background-color: #198754;
+        }
+
+
+    .schema-yellow {
+        border-color: #ffc107;
+    }
+
+
+        .schema-yellow .schema-header {
+            background-color: #ffc107;
+            color: #212529;
+        }
+
+
+    .schema-red {
+        border-color: #dc3545;
+    }
+
+
+        .schema-red .schema-header {
+            background-color: #dc3545;
+        }
+
+
+    /* =============================================================
+           RELATIONSHIPS
+           ============================================================= */
+
+    .relationship {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        padding: 12px;
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+    }
+
+
+        .relationship code {
+            padding: 5px 8px;
+            background-color: white;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            color: #d63384;
+            font-size: 0.78rem;
+        }
+
+
+        .relationship span {
+            color: #6c757d;
+            font-weight: 600;
+        }
+
+
+    /* =============================================================
+           BOTTOM ACTION
+           ============================================================= */
+
+    .schema-action {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border: 1px solid #e1e5e9;
+        border-radius: 8px;
+    }
+
+
+    /* =============================================================
+           RESPONSIVE
+           ============================================================= */
+
+    @@media (max-width: 767.98px) {
+
+        .schema-action {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+
+</style>

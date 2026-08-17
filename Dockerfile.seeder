@@ -1,0 +1,35 @@
+# ============================================================
+# BUILD
+# ============================================================
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+
+WORKDIR /src
+
+COPY ["BizPulse.AI.POC/BizPulse.AI.POC.csproj", "BizPulse.AI.POC/"]
+COPY ["BizPulse.AI.POC.DatabaseSeeder/BizPulse.AI.POC.DatabaseSeeder.csproj", "BizPulse.AI.POC.DatabaseSeeder/"]
+
+RUN dotnet restore "BizPulse.AI.POC.DatabaseSeeder/BizPulse.AI.POC.DatabaseSeeder.csproj"
+
+COPY . .
+
+WORKDIR "/src/BizPulse.AI.POC.DatabaseSeeder"
+
+RUN dotnet publish \
+    "BizPulse.AI.POC.DatabaseSeeder.csproj" \
+    -c Release \
+    -o /app/publish \
+    /p:UseAppHost=false
+
+
+# ============================================================
+# RUNTIME
+# ============================================================
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+
+WORKDIR /app
+
+COPY --from=build /app/publish .
+
+ENTRYPOINT ["dotnet", "BizPulse.AI.POC.DatabaseSeeder.dll"]

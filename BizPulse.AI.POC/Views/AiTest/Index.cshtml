@@ -1,0 +1,1058 @@
+﻿@using BizPulse.AI.POC.Models
+
+@{
+    ViewData["Title"] = "IntentSQL AI Agent";
+
+    var results =
+        ViewBag.Results as List<Dictionary<string, object?>>;
+
+    var attempts =
+        ViewBag.Attempts as List<SqlAttemptViewModel>;
+}
+
+<div class="container-fluid py-4">
+
+    @* ============================================================
+    MAIN AI WORKSPACE
+    ============================================================ *@
+
+    <div class="row g-4">
+
+        @* ========================================================
+        LEFT COLUMN
+        ======================================================== *@
+
+        <div class="col-lg-4 col-xl-3">
+
+            <div class="card shadow-sm border-0 h-100">
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex align-items-center gap-2 mb-2">
+
+                        <span class="agent-icon">
+                            ✨
+                        </span>
+
+                        <span class="text-uppercase small fw-semibold text-primary">
+                            AI Database Intelligence
+                        </span>
+
+                    </div>
+
+
+                    <h1 class="fw-bold mb-2">
+                        IntentSQL
+                    </h1>
+
+                    <p class="text-muted mb-4">
+                        Ask questions about your business data in natural
+                        language. No SQL required.
+                    </p>
+
+
+                    @* =================================================
+                    STATUS
+                    ================================================= *@
+
+                    @if (ViewBag.AiEnabled == true)
+                    {
+                        <div class="agent-status">
+                            <span class="status-dot"></span>
+                            AI Ready
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="agent-status agent-status-offline">
+                            <span class="status-dot"></span>
+                            AI Offline
+                        </div>
+                    }
+
+
+                    <hr />
+
+
+                    @* =================================================
+                    HOW IT WORKS
+                    ================================================= *@
+
+                    <h5 class="fw-bold mt-4 mb-3">
+                        How IntentSQL Works
+                    </h5>
+
+
+                    <div class="workflow">
+
+                        <div class="workflow-step">
+
+                            <div class="workflow-number">
+                                1
+                            </div>
+
+                            <div>
+
+                                <div class="fw-semibold">
+                                    Understand Intent
+                                </div>
+
+                                <div class="small text-muted">
+                                    Understand the business question.
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="workflow-line"></div>
+
+
+                        <div class="workflow-step">
+
+                            <div class="workflow-number">
+                                2
+                            </div>
+
+                            <div>
+
+                                <div class="fw-semibold">
+                                    Generate SQL
+                                </div>
+
+                                <div class="small text-muted">
+                                    Translate the intent into SQL.
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="workflow-line"></div>
+
+
+                        <div class="workflow-step">
+
+                            <div class="workflow-number">
+                                3
+                            </div>
+
+                            <div>
+
+                                <div class="fw-semibold">
+                                    Execute & Analyze
+                                </div>
+
+                                <div class="small text-muted">
+                                    Execute the query and return results.
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <hr class="my-4" />
+
+
+                    @* =================================================
+                    TRY ASKING
+                    ================================================= *@
+
+                    <h5 class="fw-bold mb-1">
+                        Try asking
+                    </h5>
+
+                    <p class="small text-muted mb-3">
+                        Example business questions
+                    </p>
+
+
+                    <div class="example-question">
+                        Which 5 products generated the most revenue from completed orders this calendar year?
+                    </div>
+
+                    <div class="example-question">
+                        Which customer city has the highest number of customers?
+                    </div>
+
+                    <div class="example-question">
+                        Which product category has the most products?
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        @* ========================================================
+        RIGHT COLUMN
+        ======================================================== *@
+
+        <div class="col-lg-8 col-xl-9">
+
+            @* ====================================================
+            ASK PANEL
+            ==================================================== *@
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-body p-4 p-xl-5">
+
+
+                    <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+
+                        <div>
+
+                            <div class="text-uppercase small fw-semibold text-primary mb-1">
+                                Natural Language Query
+                            </div>
+
+                            <h2 class="fw-bold mb-2">
+                                Ask your business question
+                            </h2>
+
+                            <p class="text-muted mb-0">
+                                Describe what you want to know and IntentSQL
+                                will generate the appropriate query.
+                            </p>
+
+                        </div>
+
+
+                        <span class="badge bg-light text-dark border px-3 py-2 text-nowrap">
+
+                            Question
+                            <span class="mx-1">→</span>
+                            Intent
+                            <span class="mx-1">→</span>
+                            SQL
+                            <span class="mx-1">→</span>
+                            Results
+
+                        </span>
+
+                    </div>
+
+
+                    @* =================================================
+                    QUESTION + PROVIDER
+                    ================================================= *@
+
+                    <form id="aiForm"
+                          asp-controller="AiTest"
+                          asp-action="Ask"
+                          method="post">
+
+                        @* =================================================
+                        SELECTED PROVIDER
+
+                        The clicked button updates this hidden field
+                        before the buttons are disabled.
+                        ================================================= *@
+
+                        <input type="hidden"
+                               id="providerInput"
+                               name="provider"
+                               value="Ollama" />
+
+
+                        <div class="mb-4">
+
+                            <textarea id="prompt"
+                                      name="prompt"
+                                      class="form-control question-box"
+                                      rows="5"
+                                      placeholder="Example: Which 5 products generated the most revenue from completed orders this calendar year?">@ViewBag.Prompt</textarea>
+
+                        </div>
+
+
+                        <div class="d-flex flex-wrap justify-content-between align-items-end gap-4">
+
+                            <div>
+
+                                <div class="d-flex flex-wrap gap-2">
+
+                                    @* =================================================
+                                    LOCAL QWEN
+                                    ================================================= *@
+
+                                    @*<button type="submit"
+                                            value="Ollama"
+                                            class="btn btn-outline-primary px-4 py-2">
+
+                                        🖥️
+                                        Local AI
+
+                                    </button>*@
+
+                                    @*<button type="button"
+                                            class="btn btn-outline-secondary px-4 py-2"
+                                            disabled>
+
+                                        🖥️
+                                        Local AI
+
+                                    </button> *@
+
+
+                                    @* =================================================
+                                    CLOUD QWEN
+                                    ================================================= *@
+
+                                    @if (ViewBag.AiEnabled == true)
+                                    {
+                                        <button type="submit"
+                                                name="provider"
+                                                value="TogetherAI"
+                                                class="btn btn-primary px-4 py-2">
+
+                                            💬
+                                            Ask IntentSQL
+
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button"
+                                                class="btn btn-secondary px-4 py-2"
+                                                disabled>
+
+                                            💬
+                                            Ask IntentSQL
+
+                                        </button>
+                                    }
+
+                                    @if (ViewBag.AiEnabled != true)
+                                    {
+                                        <div class="small text-muted">
+                                            AI querying is currently unavailable.
+                                        </div>
+                                    }
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="text-muted small">
+
+                                Read-only analytics
+                                <span class="mx-1">•</span>
+                                SQL generation
+                                <span class="mx-1">•</span>
+                                Query execution
+
+                            </div>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+
+            @* ====================================================
+            PROVIDER / MODEL INFORMATION
+            ==================================================== 
+
+            @if (ViewBag.Provider != null)
+            {
+                <div class="card border-0 shadow-sm mt-3">
+
+                    <div class="card-body py-3 px-4">
+
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+
+                            <span class="small text-muted me-1">
+                                Current execution:
+                            </span>
+
+                            <span class="badge bg-secondary">
+
+                                Provider:
+                                @ViewBag.Provider
+
+                            </span>
+
+
+                            @if (ViewBag.Model != null)
+                            {
+                                <span class="badge bg-info text-dark">
+
+                                    Model:
+                                    @ViewBag.Model
+
+                                </span>
+                            }
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }*@
+
+
+            @* ====================================================
+            ERROR
+            ==================================================== *@
+
+            @if (ViewBag.Error != null)
+            {
+                <div id="errorSection"
+                     class="alert alert-danger mt-4">
+
+                    <strong>Error:</strong>
+
+                    <div class="mt-2">
+                        @ViewBag.Error
+                    </div>
+
+                </div>
+            }
+
+
+            @* ====================================================
+            AI TOKEN USAGE
+            ==================================================== *@
+
+            @if (ViewBag.InputTokens != null)
+            {
+                <div id="tokenSection"
+                     class="mt-4">
+
+                    <div class="card shadow-sm border-0">
+
+                        <div class="card-body p-4">
+
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+
+                                <div>
+
+                                    <h5 class="fw-bold mb-1">
+                                        AI Usage
+                                    </h5>
+
+                                    <div class="small text-muted">
+                                        Token consumption for this request
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="row g-3">
+
+                                <div class="col-md-4">
+
+                                    <div class="metric-card">
+
+                                        <div class="text-muted small">
+                                            Input Tokens
+                                        </div>
+
+                                        <div class="fs-4 fw-bold">
+                                            @ViewBag.InputTokens
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="col-md-4">
+
+                                    <div class="metric-card">
+
+                                        <div class="text-muted small">
+                                            Output Tokens
+                                        </div>
+
+                                        <div class="fs-4 fw-bold">
+                                            @ViewBag.OutputTokens
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="col-md-4">
+
+                                    <div class="metric-card">
+
+                                        <div class="text-muted small">
+                                            Total Tokens
+                                        </div>
+
+                                        <div class="fs-4 fw-bold">
+                                            @ViewBag.TotalTokens
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+
+
+            @* ====================================================
+            SQL GENERATION ATTEMPTS
+            ==================================================== *@
+
+            @if (attempts != null)
+            {
+                <div id="attemptsSection"
+                     class="mt-4">
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+
+                        <h3 class="mb-0">
+                            SQL Generation Attempts
+                        </h3>
+
+                        @if (ViewBag.TotalGenerationTimeSeconds != null)
+                        {
+                            <span class="badge bg-secondary">
+
+                                Total SQL generation:
+                                @ViewBag.TotalGenerationTimeSeconds.ToString("F2")
+                                seconds
+
+                            </span>
+                        }
+
+                    </div>
+
+
+                    <div class="card shadow-sm">
+
+                        <div class="card-body">
+
+                            @foreach (var attempt in attempts)
+                            {
+                                @if (attempt.Success)
+                                {
+                                    <div class="alert alert-success mb-3">
+
+                                        <div class="d-flex justify-content-between align-items-center">
+
+                                            <strong>
+                                                Attempt @attempt.AttemptNumber
+                                                ✓ Success
+                                            </strong>
+
+                                            <span>
+                                                Generated in:
+                                                @attempt.GenerationTimeSeconds.ToString("F2")
+                                                seconds
+                                            </span>
+
+                                        </div>
+
+                                        <div class="mt-2">
+                                            SQL executed successfully.
+                                        </div>
+
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-warning mb-3">
+
+                                        <div class="d-flex justify-content-between align-items-center">
+
+                                            <strong>
+                                                Attempt @attempt.AttemptNumber
+                                                ✗ Failed
+                                            </strong>
+
+                                            <span>
+                                                Generated in:
+                                                @attempt.GenerationTimeSeconds.ToString("F2")
+                                                seconds
+                                            </span>
+
+                                        </div>
+
+
+                                        @if (!string.IsNullOrWhiteSpace(attempt.Error))
+                                        {
+                                            <div class="mt-2">
+
+                                                <strong>
+                                                    Database error:
+                                                </strong>
+
+                                                <div class="mt-1">
+                                                    @attempt.Error
+                                                </div>
+
+                                            </div>
+                                        }
+
+                                    </div>
+                                }
+                            }
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+
+
+            @* ====================================================
+            GENERATED SQL
+            ==================================================== *@
+
+            @if (ViewBag.Sql != null)
+            {
+                <div id="sqlSection"
+                     class="mt-4">
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+
+                        <h3 class="mb-0">
+                            Generated SQL
+                        </h3>
+
+                        @if (ViewBag.TotalProcessingTimeSeconds != null)
+                        {
+                            <span class="badge bg-secondary">
+
+                                Total processing:
+                                @ViewBag.TotalProcessingTimeSeconds.ToString("F2")
+                                seconds
+
+                            </span>
+                        }
+
+                    </div>
+
+
+                    <div class="card shadow-sm">
+
+                        <div class="card-body">
+
+                            <pre class="mb-0"
+                                 style="white-space: pre-wrap;">@ViewBag.Sql</pre>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+
+
+            @* ====================================================
+            QUERY RESULTS
+            ==================================================== *@
+
+            @if (results != null)
+            {
+                <div id="resultsSection"
+                     class="mt-4">
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+
+                        <h3 class="mb-0">
+                            Query Results
+                        </h3>
+
+                        @if (results.Count > 0)
+                        {
+                            <span class="badge bg-success">
+                                @results.Count row(s)
+                            </span>
+                        }
+
+                    </div>
+
+
+                    @if (results.Count == 0)
+                    {
+                        <div class="alert alert-info">
+
+                            The query returned no results.
+
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="card shadow-sm">
+
+                            <div class="card-body">
+
+                                <div class="table-responsive">
+
+                                    <table class="table table-bordered table-striped mb-0">
+
+                                        <thead class="table-dark">
+
+                                            <tr>
+
+                                                @foreach (var column in results[0].Keys)
+                                                {
+                                                    <th>
+                                                        @column
+                                                    </th>
+                                                }
+
+                                            </tr>
+
+                                        </thead>
+
+                                        <tbody>
+
+                                            @foreach (var row in results)
+                                            {
+                                                <tr>
+
+                                                    @foreach (var value in row.Values)
+                                                    {
+                                                        <td>
+                                                            @(value ?? "")
+                                                        </td>
+                                                    }
+
+                                                </tr>
+                                            }
+
+                                        </tbody>
+
+                                    </table>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<style>
+
+    /* =============================================================
+               AGENT ICON
+               ============================================================= */
+
+    .agent-icon {
+        width: 34px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        background-color: #e7f1ff;
+        font-size: 1.1rem;
+    }
+
+
+    /* =============================================================
+               AGENT STATUS
+               ============================================================= */
+
+    .agent-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 13px;
+        border: 1px solid #b8dfc8;
+        border-radius: 20px;
+        background-color: #f1fbf5;
+        color: #198754;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .agent-status-offline {
+        border-color: #d6d8db;
+        background-color: #f1f3f5;
+        color: #6c757d;
+    }
+
+    .agent-status-offline .status-dot {
+            background-color: #6c757d;
+    }
+
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: #198754;
+    }
+
+
+    /* =============================================================
+               WORKFLOW
+               ============================================================= */
+
+    .workflow-step {
+        display: flex;
+        align-items: flex-start;
+        gap: 11px;
+    }
+
+
+    .workflow-number {
+        width: 27px;
+        height: 27px;
+        min-width: 27px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background-color: #0d6efd;
+        color: white;
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+
+
+    .workflow-line {
+        height: 14px;
+        margin-left: 13px;
+        border-left: 2px dotted #b8c9dc;
+    }
+
+
+    /* =============================================================
+               EXAMPLE QUESTIONS
+               ============================================================= */
+
+    .example-question {
+        position: relative;
+        padding: 9px 0 9px 17px;
+        border-bottom: 1px solid #edf0f3;
+        color: #495057;
+        font-size: 0.86rem;
+        line-height: 1.4;
+    }
+
+
+        .example-question:last-child {
+            border-bottom: none;
+        }
+
+
+        .example-question::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #0d6efd;
+            font-weight: 600;
+        }
+
+
+    /* =============================================================
+               QUESTION BOX
+               ============================================================= */
+
+    .question-box {
+        min-height: 135px;
+        resize: vertical;
+        font-size: 1rem;
+        padding: 16px;
+        border-color: #ced8e3;
+    }
+
+
+        .question-box:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.12);
+        }
+
+
+    /* =============================================================
+               METRIC CARDS
+               ============================================================= */
+
+    .metric-card {
+        height: 100%;
+        padding: 16px;
+        border: 1px solid #dee5ed;
+        border-radius: 8px;
+        background-color: #f8fafc;
+    }
+
+
+    /* =============================================================
+               RESPONSIVE
+               ============================================================= */
+
+    @@media (max-width: 991.98px) {
+
+        .agent-status {
+            margin-top: 10px;
+        }
+    }
+
+
+    @@media (max-width: 767.98px) {
+
+        .question-box {
+            min-height: 110px;
+        }
+    }
+
+</style>
+
+
+<script>
+
+    document.getElementById("aiForm").addEventListener("submit", function (event) {
+
+        /*
+         * Get the button that actually submitted the form.
+         *
+         * event.submitter tells us whether the user clicked
+         * Local Qwen or Cloud Qwen.
+         */
+        const submittedButton = event.submitter;
+
+
+        /*
+         * Store the selected provider in the hidden field
+         * BEFORE disabling the buttons.
+         */
+        if (submittedButton) {
+
+            const providerInput =
+                document.getElementById("providerInput");
+
+            providerInput.value =
+                submittedButton.value;
+
+        }
+
+
+        /*
+         * Disable both buttons to prevent double-clicks.
+         *
+         * The provider has already been copied into the
+         * hidden input, so disabling the buttons is now safe.
+         */
+        const buttons =
+            this.querySelectorAll("button[type='submit']");
+
+        buttons.forEach(function (button) {
+
+            button.disabled = true;
+
+        });
+
+
+        /*
+         * Show progress on the button that was clicked.
+         */
+        if (submittedButton) {
+
+            submittedButton.innerHTML =
+                "⏳ Generating SQL...";
+
+        }
+
+
+        /*
+         * Remove previous SQL.
+         */
+        const sqlSection =
+            document.getElementById("sqlSection");
+
+        if (sqlSection) {
+            sqlSection.remove();
+        }
+
+
+        /*
+         * Remove previous results.
+         */
+        const resultsSection =
+            document.getElementById("resultsSection");
+
+        if (resultsSection) {
+            resultsSection.remove();
+        }
+
+
+        /*
+         * Remove previous error.
+         */
+        const errorSection =
+            document.getElementById("errorSection");
+
+        if (errorSection) {
+            errorSection.remove();
+        }
+
+
+        /*
+         * Remove previous attempts.
+         */
+        const attemptsSection =
+            document.getElementById("attemptsSection");
+
+        if (attemptsSection) {
+            attemptsSection.remove();
+        }
+
+
+        /*
+         * Remove previous token usage.
+         */
+        const tokenSection =
+            document.getElementById("tokenSection");
+
+        if (tokenSection) {
+            tokenSection.remove();
+        }
+
+
+        /*
+         * Remove previous provider information.
+         *
+         * The provider card currently does not have the
+         * "current-execution" class, so this safely does nothing.
+         */
+        const providerBadges =
+            document.querySelector(".current-execution");
+
+        if (providerBadges) {
+            providerBadges.remove();
+        }
+
+    });
+
+</script>
