@@ -179,12 +179,12 @@ public class TogetherAiService : IAiTextGenerationService
 
                         if (delta.TryGetProperty(
                                 "content",
-                                out var content) &&
-                            content.ValueKind ==
+                                out var contentElement) &&
+                            contentElement.ValueKind ==
                             JsonValueKind.String)
                         {
                             contentBuilder.Append(
-                                content.GetString());
+                                contentElement.GetString());
                         }
                     }
                 }
@@ -248,17 +248,38 @@ public class TogetherAiService : IAiTextGenerationService
 
         stopwatch.Stop();
 
+        var content = contentBuilder.ToString().Trim();
+        var reasoningText = reasoningBuilder.ToString().Trim();
+
+        // Some Qwen/reasoning deployments embed reasoning in <think> tags.
+        if (thinkEnabled && string.IsNullOrWhiteSpace(reasoningText))
+        {
+            var match = System.Text.RegularExpressions.Regex.Match(
+                content,
+                @"<think>\s*(.*?)\s*</think>",
+                System.Text.RegularExpressions.RegexOptions.Singleline |
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+            if (match.Success)
+            {
+                reasoningText = match.Groups[1].Value.Trim();
+                content = System.Text.RegularExpressions.Regex.Replace(
+                    content,
+                    @"<think>.*?</think>\s*",
+                    string.Empty,
+                    System.Text.RegularExpressions.RegexOptions.Singleline |
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase).Trim();
+            }
+        }
+
         return new AiGenerationResult
         {
-            Content =
-                contentBuilder
-                    .ToString()
-                    .Trim(),
+            Content = content,
 
             Reasoning =
-                reasoningBuilder.Length == 0
-                    ? null
-                    : reasoningBuilder.ToString().Trim(),
+                thinkEnabled && !string.IsNullOrWhiteSpace(reasoningText)
+                    ? reasoningText
+                    : null,
 
             Provider =
                 "TogetherAI",

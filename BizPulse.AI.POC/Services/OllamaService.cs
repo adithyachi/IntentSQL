@@ -24,9 +24,8 @@ public class OllamaService : IAiTextGenerationService
             Model = "qwen3:1.7b",
             Prompt = prompt,
             Stream = false,
-            // Thinking is controlled by the Together AI POC toggle.
-            // Ollama remains non-thinking in the current POC path.
-            Think = false,
+            // Pass the UI toggle through to Qwen/Ollama.
+            Think = thinkEnabled,
 
             Options = new OllamaOptions
             {
@@ -64,10 +63,38 @@ public class OllamaService : IAiTextGenerationService
                 "Ollama returned an empty response.");
         }
 
+        var reasoning =
+            result.Thinking ?? result.Reasoning;
+
+        var content =
+            result.Response ?? string.Empty;
+
+        // Some model/API combinations may embed reasoning in <think> tags.
+        // Keep the final answer clean and store the reasoning separately.
+        if (string.IsNullOrWhiteSpace(reasoning))
+        {
+            var match = System.Text.RegularExpressions.Regex.Match(
+                content,
+                @"<think>\s*(.*?)\s*</think>",
+                System.Text.RegularExpressions.RegexOptions.Singleline |
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+            if (match.Success)
+            {
+                reasoning = match.Groups[1].Value.Trim();
+                content = System.Text.RegularExpressions.Regex.Replace(
+                    content,
+                    @"<think>.*?</think>\s*",
+                    string.Empty,
+                    System.Text.RegularExpressions.RegexOptions.Singleline |
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase).Trim();
+            }
+        }
+
         return new AiGenerationResult
         {
             Content =
-                result.Response ?? string.Empty,
+                content,
 
             Provider =
                 "Ollama",
@@ -87,6 +114,9 @@ public class OllamaService : IAiTextGenerationService
 
             // Ollama's generate response does not provide
             // reasoning-token usage in the same form as Together AI.
+            Reasoning =
+                thinkEnabled ? reasoning : null,
+
             ReasoningTokens =
                 0,
 
@@ -138,6 +168,12 @@ public class OllamaService : IAiTextGenerationService
 
         [JsonPropertyName("response")]
         public string? Response { get; set; }
+
+        [JsonPropertyName("thinking")]
+        public string? Thinking { get; set; }
+
+        [JsonPropertyName("reasoning")]
+        public string? Reasoning { get; set; }
 
         [JsonPropertyName("prompt_eval_count")]
         public int PromptEvalCount { get; set; }

@@ -345,12 +345,17 @@ public class AiTestController : Controller
                 ViewBag.TotalProcessingTimeSeconds =
                     totalStopwatch.Elapsed.TotalSeconds;
 
-                await SaveConversationExecutionHistoryAsync(
+                var historyError = await TrySaveConversationExecutionHistoryAsync(
                     prompt,
                     think,
                     conversationResult,
                     totalStopwatch.ElapsedMilliseconds,
                     cancellationToken);
+
+                if (!string.IsNullOrWhiteSpace(historyError))
+                {
+                    ViewBag.PersistenceError = historyError;
+                }
 
                 // Conversation responses are intentionally not sent through
                 // the SQL execution/correction pipeline.
@@ -362,9 +367,23 @@ public class AiTestController : Controller
 
                 ViewBag.Prompt = prompt;
                 ViewBag.Mode = "Conversation";
-                ViewBag.Error = ex.Message;
+                ViewBag.Error = GetExceptionMessage(ex);
                 ViewBag.TotalProcessingTimeSeconds =
                     totalStopwatch.Elapsed.TotalSeconds;
+
+                var historyError = await TrySaveFailedExecutionHistoryAsync(
+                    prompt,
+                    provider,
+                    think,
+                    "Conversation",
+                    GetExceptionMessage(ex),
+                    totalStopwatch.ElapsedMilliseconds,
+                    cancellationToken);
+
+                if (!string.IsNullOrWhiteSpace(historyError))
+                {
+                    ViewBag.PersistenceError = historyError;
+                }
 
                 return View("Index");
             }
@@ -404,13 +423,18 @@ public class AiTestController : Controller
             // Persist AI execution history
             // ---------------------------------------------------------
 
-            await SaveExecutionHistoryAsync(
+            var historyError = await TrySaveExecutionHistoryAsync(
                 prompt,
                 provider,
                 think,
                 executionResult,
                 totalStopwatch.ElapsedMilliseconds,
                 cancellationToken);
+
+            if (!string.IsNullOrWhiteSpace(historyError))
+            {
+                ViewBag.PersistenceError = historyError;
+            }
 
             // ---------------------------------------------------------
             // Populate UI
@@ -488,19 +512,27 @@ public class AiTestController : Controller
             // Even if AI generation itself fails, record the question.
             // ---------------------------------------------------------
 
-            await SaveFailedExecutionHistoryAsync(
-                prompt,
-                provider,
-                think,
-                ex.Message,
-                totalStopwatch.ElapsedMilliseconds,
-                cancellationToken);
-
             ViewBag.Prompt =
                 prompt;
 
+            ViewBag.Mode = mode;
+            ViewBag.ThinkEnabled = think;
             ViewBag.Error =
-                ex.Message;
+                GetExceptionMessage(ex);
+
+            var historyError = await TrySaveFailedExecutionHistoryAsync(
+                prompt,
+                provider,
+                think,
+                "Strict SQL",
+                GetExceptionMessage(ex),
+                totalStopwatch.ElapsedMilliseconds,
+                cancellationToken);
+
+            if (!string.IsNullOrWhiteSpace(historyError))
+            {
+                ViewBag.PersistenceError = historyError;
+            }
 
             ViewBag.TotalProcessingTimeSeconds =
                 totalStopwatch.Elapsed.TotalSeconds;
@@ -509,7 +541,7 @@ public class AiTestController : Controller
         }
     }
 
-    private async Task SaveExecutionHistoryAsync(
+    private async Task<string?> TrySaveExecutionHistoryAsync(
         string question,
         AiProvider provider,
         bool thinkEnabled,
@@ -517,133 +549,157 @@ public class AiTestController : Controller
         long totalProcessingTimeMs,
         CancellationToken cancellationToken)
     {
-        var generations =
-            executionResult.Generations;
+        try
+        {
+            var generations = executionResult.Generations;
+            var lastGeneration = generations.LastOrDefault();
 
-        var lastGeneration =
-            generations.LastOrDefault();
-
-        var execution =
-            new AiAgentExecution
+            var execution = new AiAgentExecution
             {
                 Question = question,
-
                 Mode = "Strict SQL",
-
                 Response = BuildSqlResponse(executionResult.Results),
-
                 ThinkEnabled = thinkEnabled,
-
-                Reasoning =
-                    BuildCombinedReasoning(generations),
-
-                Provider =
-                    provider.ToString(),
-
-                Model =
-                    lastGeneration?.Model ?? string.Empty,
-
-                InputTokens =
-                    generations.Sum(
-                        x => x.InputTokens),
-
-                OutputTokens =
-                    generations.Sum(
-                        x => x.OutputTokens),
-
-                TotalTokens =
-                    generations.Sum(
-                        x => x.TotalTokens),
-
-                ReasoningTokens =
-                    generations.Sum(
-                        x => x.ReasoningTokens),
-
-                ResponseTimeMs =
-                    generations.Sum(
-                        x => x.ResponseTimeMs),
-
-                TotalProcessingTimeMs =
-                    totalProcessingTimeMs,
-
-                Success =
-                    string.IsNullOrWhiteSpace(
-                        executionResult.Error),
-
-                FinalSql =
-                    executionResult.Sql,
-
-                Error =
-                    executionResult.Error,
-
-                CreatedAt =
-                    DateTime.UtcNow
+                Reasoning = BuildCombinedReasoning(generations),
+                Provider = provider.ToString(),
+                Model = lastGeneration?.Model ?? string.Empty,
+                InputTokens = generations.Sum(x => x.InputTokens),
+                OutputTokens = generations.Sum(x => x.OutputTokens),
+                TotalTokens = generations.Sum(x => x.TotalTokens),
+                ReasoningTokens = generations.Sum(x => x.ReasoningTokens),
+                ResponseTimeMs = generations.Sum(x => x.ResponseTimeMs),
+                TotalProcessingTimeMs = totalProcessingTimeMs,
+                Success = string.IsNullOrWhiteSpace(executionResult.Error),
+                FinalSql = executionResult.Sql,
+                Error = executionResult.Error,
+                CreatedAt = DateTime.UtcNow
             };
 
-        foreach (var attempt in executionResult.Attempts)
-        {
-            execution.Attempts.Add(
-                new AiAgentAttempt
+            foreach (var attempt in executionResult.Attempts)
+            {
+                execution.Attempts.Add(new AiAgentAttempt
                 {
-                    AttemptNumber =
-                        attempt.AttemptNumber,
-
-                    Sql =
-                        attempt.Sql,
-
-                    Success =
-                        attempt.Success,
-
-                    Error =
-                        attempt.Error,
-
-                    GenerationTimeMs =
-                        (long)(
-                            attempt.GenerationTimeSeconds *
-                            1000),
-
-                    CreatedAt =
-                        DateTime.UtcNow
+                    AttemptNumber = attempt.AttemptNumber,
+                    Sql = attempt.Sql,
+                    Success = attempt.Success,
+                    Error = attempt.Error,
+                    GenerationTimeMs = (long)(attempt.GenerationTimeSeconds * 1000),
+                    CreatedAt = DateTime.UtcNow
                 });
+            }
+
+            _dbContext.AiAgentExecutions.Add(execution);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            return null;
         }
-
-        _dbContext.AiAgentExecutions.Add(
-            execution);
-
-        await _dbContext.SaveChangesAsync(
-            cancellationToken);
+        catch (Exception ex)
+        {
+            _dbContext.ChangeTracker.Clear();
+            return $"Execution completed, but history could not be saved: {GetExceptionMessage(ex)}";
+        }
     }
 
-    private async Task SaveConversationExecutionHistoryAsync(
+    private async Task<string?> TrySaveConversationExecutionHistoryAsync(
         string question,
         bool thinkEnabled,
         AiGenerationResult result,
         long totalProcessingTimeMs,
         CancellationToken cancellationToken)
     {
-        var execution = new AiAgentExecution
+        try
         {
-            Question = question,
-            Mode = "Conversation",
-            Response = result.Content,
-            ThinkEnabled = thinkEnabled,
-            Reasoning = result.Reasoning,
-            Provider = result.Provider,
-            Model = result.Model,
-            InputTokens = result.InputTokens,
-            OutputTokens = result.OutputTokens,
-            TotalTokens = result.TotalTokens,
-            ReasoningTokens = result.ReasoningTokens,
-            ResponseTimeMs = result.ResponseTimeMs,
-            TotalProcessingTimeMs = totalProcessingTimeMs,
-            Success = true,
-            FinalSql = null,
-            Error = null,
-            CreatedAt = DateTime.UtcNow
-        };
+            var execution = new AiAgentExecution
+            {
+                Question = question,
+                Mode = "Conversation",
+                Response = result.Content,
+                ThinkEnabled = thinkEnabled,
+                Reasoning = thinkEnabled ? result.Reasoning : null,
+                Provider = result.Provider,
+                Model = result.Model,
+                InputTokens = result.InputTokens,
+                OutputTokens = result.OutputTokens,
+                TotalTokens = result.TotalTokens,
+                ReasoningTokens = thinkEnabled ? result.ReasoningTokens : 0,
+                ResponseTimeMs = result.ResponseTimeMs,
+                TotalProcessingTimeMs = totalProcessingTimeMs,
+                Success = true,
+                FinalSql = null,
+                Error = null,
+                CreatedAt = DateTime.UtcNow
+            };
 
-        _dbContext.AiAgentExecutions.Add(execution);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+            _dbContext.AiAgentExecutions.Add(execution);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            return null;
+        }
+        catch (Exception ex)
+        {
+            _dbContext.ChangeTracker.Clear();
+            return GetExceptionMessage(ex);
+        }
+    }
+
+    private async Task<string?> TrySaveFailedExecutionHistoryAsync(
+        string question,
+        AiProvider provider,
+        bool thinkEnabled,
+        string mode,
+        string error,
+        long totalProcessingTimeMs,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var execution = new AiAgentExecution
+            {
+                Question = question,
+                Mode = mode,
+                Response = null,
+                ThinkEnabled = thinkEnabled,
+                Reasoning = null,
+                Provider = provider.ToString(),
+                Model = string.Empty,
+                InputTokens = 0,
+                OutputTokens = 0,
+                TotalTokens = 0,
+                ReasoningTokens = 0,
+                ResponseTimeMs = 0,
+                TotalProcessingTimeMs = totalProcessingTimeMs,
+                Success = false,
+                FinalSql = null,
+                Error = error,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _dbContext.AiAgentExecutions.Add(execution);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            return null;
+        }
+        catch (Exception ex)
+        {
+            _dbContext.ChangeTracker.Clear();
+            return $"Failed execution was not recorded in history: {GetExceptionMessage(ex)}";
+        }
+    }
+
+    private static string GetExceptionMessage(Exception ex)
+    {
+        var messages = new List<string>();
+        var current = ex;
+
+        while (current != null)
+        {
+            if (!string.IsNullOrWhiteSpace(current.Message) &&
+                !messages.Contains(current.Message, StringComparer.Ordinal))
+            {
+                messages.Add(current.Message);
+            }
+
+            current = current.InnerException!;
+        }
+
+        return string.Join(" | ", messages);
     }
 
     private static string? BuildSqlResponse(
@@ -674,73 +730,5 @@ public class AiTestController : Controller
             : string.Join("\n\n==============================\n\n", reasoningBlocks);
     }
 
-    private async Task SaveFailedExecutionHistoryAsync(
-        string question,
-        AiProvider provider,
-        bool thinkEnabled,
-        string error,
-        long totalProcessingTimeMs,
-        CancellationToken cancellationToken)
-    {
-        var execution =
-            new AiAgentExecution
-            {
-                Question =
-                    question,
 
-                Mode =
-                    "Strict SQL",
-
-                Response =
-                    null,
-
-                ThinkEnabled =
-                    thinkEnabled,
-
-                Reasoning =
-                    null,
-
-                Provider =
-                    provider.ToString(),
-
-                Model =
-                    string.Empty,
-
-                InputTokens =
-                    0,
-
-                OutputTokens =
-                    0,
-
-                TotalTokens =
-                    0,
-
-                ReasoningTokens =
-                    0,
-
-                ResponseTimeMs =
-                    0,
-
-                TotalProcessingTimeMs =
-                    totalProcessingTimeMs,
-
-                Success =
-                    false,
-
-                FinalSql =
-                    null,
-
-                Error =
-                    error,
-
-                CreatedAt =
-                    DateTime.UtcNow
-            };
-
-        _dbContext.AiAgentExecutions.Add(
-            execution);
-
-        await _dbContext.SaveChangesAsync(
-            cancellationToken);
-    }
 }
