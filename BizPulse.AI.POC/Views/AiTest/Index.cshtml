@@ -1074,10 +1074,19 @@
             const thinkEnabled =
                 document.getElementById("thinkToggle")?.checked === true;
 
+            const selectedMode =
+                document.querySelector('input[name="mode"]:checked')?.value;
+
+            const isConversation = selectedMode === "Conversation";
+
             submittedButton.innerHTML =
-                thinkEnabled
-                    ? "⏳ Thinking & generating SQL..."
-                    : "⏳ Generating SQL...";
+                isConversation
+                    ? (thinkEnabled
+                        ? "⏳ Thinking & generating response..."
+                        : "⏳ Generating response...")
+                    : (thinkEnabled
+                        ? "⏳ Thinking & generating SQL..."
+                        : "⏳ Generating SQL...");
 
         }
 
