@@ -58,6 +58,7 @@ public class AiTestController : Controller
         string initialSql,
         SqlGenerationResult initialGeneration,
         AiProvider provider,
+        bool thinkEnabled,
         CancellationToken cancellationToken)
     {
         var attempts =
@@ -119,6 +120,7 @@ public class AiTestController : Controller
                         attempts,
                         attemptNumber,
                         provider,
+                        thinkEnabled,
                         cancellationToken);
 
                 generations.Add(
@@ -219,6 +221,7 @@ public class AiTestController : Controller
                         attempts,
                         attemptNumber,
                         provider,
+                        thinkEnabled,
                         cancellationToken);
 
                 generations.Add(
@@ -275,6 +278,7 @@ public class AiTestController : Controller
     public async Task<IActionResult> Ask(
         string prompt,
         AiProvider provider,
+        bool think,
         CancellationToken cancellationToken)
     {
         if (!IsAiEnabled())
@@ -308,6 +312,7 @@ public class AiTestController : Controller
                 await _sqlGenerationService.GenerateSqlAsync(
                     prompt,
                     provider,
+                    think,
                     cancellationToken);
 
             // ---------------------------------------------------------
@@ -320,6 +325,7 @@ public class AiTestController : Controller
                     generationResult.Sql,
                     generationResult,
                     provider,
+                    think,
                     cancellationToken);
 
             totalStopwatch.Stop();
@@ -331,6 +337,7 @@ public class AiTestController : Controller
             await SaveExecutionHistoryAsync(
                 prompt,
                 provider,
+                think,
                 executionResult,
                 totalStopwatch.ElapsedMilliseconds,
                 cancellationToken);
@@ -373,6 +380,11 @@ public class AiTestController : Controller
                 executionResult.Generations.Sum(
                     x => x.ReasoningTokens);
 
+            ViewBag.ThinkEnabled = think;
+
+            ViewBag.Reasoning =
+                BuildCombinedReasoning(executionResult.Generations);
+
             ViewBag.Provider =
                 provider.ToString();
 
@@ -409,6 +421,7 @@ public class AiTestController : Controller
             await SaveFailedExecutionHistoryAsync(
                 prompt,
                 provider,
+                think,
                 ex.Message,
                 totalStopwatch.ElapsedMilliseconds,
                 cancellationToken);
@@ -429,6 +442,7 @@ public class AiTestController : Controller
     private async Task SaveExecutionHistoryAsync(
         string question,
         AiProvider provider,
+        bool thinkEnabled,
         SqlExecutionResult executionResult,
         long totalProcessingTimeMs,
         CancellationToken cancellationToken)
@@ -443,6 +457,11 @@ public class AiTestController : Controller
             new AiAgentExecution
             {
                 Question = question,
+
+                ThinkEnabled = thinkEnabled,
+
+                Reasoning =
+                    BuildCombinedReasoning(generations),
 
                 Provider =
                     provider.ToString(),
@@ -521,9 +540,25 @@ public class AiTestController : Controller
             cancellationToken);
     }
 
+    private static string? BuildCombinedReasoning(
+        IReadOnlyList<AiGenerationResult> generations)
+    {
+        var reasoningBlocks =
+            generations
+                .Where(x => !string.IsNullOrWhiteSpace(x.Reasoning))
+                .Select((x, index) =>
+                    $"REASONING - GENERATION {index + 1}\n\n{x.Reasoning!.Trim()}")
+                .ToList();
+
+        return reasoningBlocks.Count == 0
+            ? null
+            : string.Join("\n\n==============================\n\n", reasoningBlocks);
+    }
+
     private async Task SaveFailedExecutionHistoryAsync(
         string question,
         AiProvider provider,
+        bool thinkEnabled,
         string error,
         long totalProcessingTimeMs,
         CancellationToken cancellationToken)
@@ -533,6 +568,12 @@ public class AiTestController : Controller
             {
                 Question =
                     question,
+
+                ThinkEnabled =
+                    thinkEnabled,
+
+                Reasoning =
+                    null,
 
                 Provider =
                     provider.ToString(),

@@ -1,4 +1,4 @@
-﻿using BizPulse.AI.POC.Models;
+using BizPulse.AI.POC.Models;
 using System.Diagnostics;
 using System.Net.Http.Headers;
 using System.Text;
@@ -21,6 +21,7 @@ public class TogetherAiService : IAiTextGenerationService
 
     public async Task<AiGenerationResult> GenerateAsync(
         string prompt,
+        bool thinkEnabled = false,
         CancellationToken cancellationToken = default)
     {
         var apiKey =
@@ -55,7 +56,7 @@ public class TogetherAiService : IAiTextGenerationService
 
             stream = true,
 
-            enable_thinking = false
+            enable_thinking = thinkEnabled
         };
 
         var json =
@@ -95,6 +96,7 @@ public class TogetherAiService : IAiTextGenerationService
         var outputTokens = 0;
         var totalTokens = 0;
         var reasoningTokens = 0;
+        var reasoningBuilder = new StringBuilder();
 
         await using var stream =
             await response.Content.ReadAsStreamAsync(
@@ -153,6 +155,28 @@ public class TogetherAiService : IAiTextGenerationService
                             "delta",
                             out var delta))
                     {
+                        // Qwen thinking content may be exposed as
+                        // reasoning_content. Together's reasoning API can
+                        // also expose it as reasoning, so accept both.
+                        if (delta.TryGetProperty(
+                                "reasoning_content",
+                                out var reasoningContent) &&
+                            reasoningContent.ValueKind ==
+                            JsonValueKind.String)
+                        {
+                            reasoningBuilder.Append(
+                                reasoningContent.GetString());
+                        }
+                        else if (delta.TryGetProperty(
+                                     "reasoning",
+                                     out var reasoning) &&
+                                 reasoning.ValueKind ==
+                                 JsonValueKind.String)
+                        {
+                            reasoningBuilder.Append(
+                                reasoning.GetString());
+                        }
+
                         if (delta.TryGetProperty(
                                 "content",
                                 out var content) &&
@@ -230,6 +254,11 @@ public class TogetherAiService : IAiTextGenerationService
                 contentBuilder
                     .ToString()
                     .Trim(),
+
+            Reasoning =
+                reasoningBuilder.Length == 0
+                    ? null
+                    : reasoningBuilder.ToString().Trim(),
 
             Provider =
                 "TogetherAI",

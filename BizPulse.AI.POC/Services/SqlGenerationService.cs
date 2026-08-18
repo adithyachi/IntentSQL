@@ -40,6 +40,7 @@ public class SqlGenerationService
     public async Task<SqlGenerationResult> GenerateSqlAsync(
         string question,
         AiProvider provider,
+        bool thinkEnabled = false,
         CancellationToken cancellationToken = default)
     {
         var schema =
@@ -56,6 +57,7 @@ public class SqlGenerationService
         var response =
             await aiService.GenerateAsync(
                 prompt,
+                thinkEnabled,
                 cancellationToken);
 
         return new SqlGenerationResult
@@ -70,6 +72,7 @@ public class SqlGenerationService
         IReadOnlyList<SqlAttemptViewModel> previousAttempts,
         int correctionAttempt,
         AiProvider provider,
+        bool thinkEnabled = false,
         CancellationToken cancellationToken = default)
     {
         if (previousAttempts == null ||
@@ -96,6 +99,7 @@ public class SqlGenerationService
         var response =
             await aiService.GenerateAsync(
                 prompt,
+                thinkEnabled,
                 cancellationToken);
 
         return new SqlGenerationResult

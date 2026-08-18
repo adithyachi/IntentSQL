@@ -1,10 +1,14 @@
-﻿namespace BizPulse.AI.POC.Models;
+namespace BizPulse.AI.POC.Models;
 
 public class AiAgentExecution
 {
     public long Id { get; set; }
 
     public string Question { get; set; } = string.Empty;
+
+    public bool ThinkEnabled { get; set; }
+
+    public string? Reasoning { get; set; }
 
     public string Provider { get; set; } = string.Empty;
 

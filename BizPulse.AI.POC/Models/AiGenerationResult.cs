@@ -1,8 +1,10 @@
-﻿namespace BizPulse.AI.POC.Models;
+namespace BizPulse.AI.POC.Models;
 
 public class AiGenerationResult
 {
     public string Content { get; init; } = string.Empty;
+
+    public string? Reasoning { get; init; }
 
     public string Provider { get; init; } = string.Empty;
 

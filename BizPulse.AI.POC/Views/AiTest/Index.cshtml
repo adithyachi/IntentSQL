@@ -1,4 +1,4 @@
-﻿@using BizPulse.AI.POC.Models
+@using BizPulse.AI.POC.Models
 
 @{
     ViewData["Title"] = "IntentSQL AI Agent";
@@ -271,6 +271,19 @@
                                       rows="5"
                                       placeholder="Example: Which 5 products generated the most revenue from completed orders this calendar year?">@ViewBag.Prompt</textarea>
 
+                        </div>
+
+
+                        <div class="d-flex align-items-center justify-content-between mb-4 p-3 border rounded bg-light">
+                            <div>
+                                <div class="fw-semibold">Think / Reasoning</div>
+                                <div class="small text-muted">Enable Qwen reasoning and save it with this execution.</div>
+                            </div>
+                            <div class="form-check form-switch fs-5 mb-0">
+                                <input class="form-check-input" type="checkbox" role="switch" id="thinkToggle" name="think" value="true" @(ViewBag.ThinkEnabled == true ? "checked" : "") />
+                                <input type="hidden" name="think" value="false" />
+                                <label class="form-check-label visually-hidden" for="thinkToggle">Think / Reasoning</label>
+                            </div>
                         </div>
 
 
@@ -626,6 +639,36 @@
             GENERATED SQL
             ==================================================== *@
 
+            @if (!string.IsNullOrWhiteSpace(ViewBag.Reasoning as string))
+            {
+                <div class="card mt-4 border-primary">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-semibold">Reasoning captured</div>
+                            <div class="small text-muted">Qwen reasoning was captured for this execution.</div>
+                        </div>
+                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#reasoningModal">
+                            Show Reasoning
+                        </button>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="reasoningModal" tabindex="-1" aria-labelledby="reasoningModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="reasoningModalLabel">Qwen Reasoning</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <pre class="mb-0" style="white-space: pre-wrap; font-family: inherit;">@ViewBag.Reasoning</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+
             @if (ViewBag.Sql != null)
             {
                 <div id="sqlSection"
@@ -979,8 +1022,13 @@
          */
         if (submittedButton) {
 
+            const thinkEnabled =
+                document.getElementById("thinkToggle")?.checked === true;
+
             submittedButton.innerHTML =
-                "⏳ Generating SQL...";
+                thinkEnabled
+                    ? "⏳ Thinking & generating SQL..."
+                    : "⏳ Generating SQL...";
 
         }
 

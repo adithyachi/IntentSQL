@@ -16,6 +16,7 @@ public class OllamaService : IAiTextGenerationService
 
     public async Task<AiGenerationResult> GenerateAsync(
         string prompt,
+        bool thinkEnabled = false,
         CancellationToken cancellationToken = default)
     {
         var request = new OllamaRequest
@@ -23,6 +24,8 @@ public class OllamaService : IAiTextGenerationService
             Model = "qwen3:1.7b",
             Prompt = prompt,
             Stream = false,
+            // Thinking is controlled by the Together AI POC toggle.
+            // Ollama remains non-thinking in the current POC path.
             Think = false,
 
             Options = new OllamaOptions

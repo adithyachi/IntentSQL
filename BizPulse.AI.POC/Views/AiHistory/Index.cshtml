@@ -1,4 +1,4 @@
-﻿@model IReadOnlyList<BizPulse.AI.POC.Models.AiAgentExecution>
+@model IReadOnlyList<BizPulse.AI.POC.Models.AiAgentExecution>
 
 @{
     ViewData["Title"] = "IntentSQL Agent History";
@@ -101,6 +101,10 @@
                                 </th>
 
                                 <th>
+                                    Reasoning
+                                </th>
+
+                                <th>
                                     Status
                                 </th>
 
@@ -194,6 +198,20 @@
 
                                         @((execution.ResponseTimeMs / 1000.0).ToString("F2")) s
 
+                                    </td>
+
+
+                                    <td class="text-center">
+                                        @if (!string.IsNullOrWhiteSpace(execution.Reasoning))
+                                        {
+                                            <a asp-controller="AiHistory" asp-action="Details" asp-route-id="@execution.Id" asp-fragment="reasoning" class="btn btn-sm btn-outline-primary">
+                                                Show Reasoning
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">None</span>
+                                        }
                                     </td>
 
 
