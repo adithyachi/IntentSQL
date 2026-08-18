@@ -1,4 +1,4 @@
-﻿@model BizPulse.AI.POC.Models.DataExplorerViewModel
+@model BizPulse.AI.POC.Models.DataExplorerViewModel
 
 @{
     ViewData["Title"] = "Data Explorer";
@@ -465,13 +465,49 @@
                 </li>
 
 
-                <!-- PAGE NUMBERS -->
-                @for (var pageNumber = 1;
-               pageNumber <= Model.TotalPages;
-               pageNumber++)
+                <!-- COMPACT PAGE NUMBERS -->
+                @{
+                    var paginationStart = Math.Max(1, Model.Page - 2);
+                    var paginationEnd = Math.Min(Model.TotalPages, Model.Page + 2);
+
+                    if (Model.Page <= 3)
+                    {
+                        paginationStart = 1;
+                        paginationEnd = Math.Min(Model.TotalPages, 5);
+                    }
+                    else if (Model.Page >= Model.TotalPages - 2)
+                    {
+                        paginationStart = Math.Max(1, Model.TotalPages - 4);
+                        paginationEnd = Model.TotalPages;
+                    }
+                }
+
+                @if (paginationStart > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link"
+                           asp-controller="DataExplorer"
+                           asp-action="Index"
+                           asp-route-table="@Model.SelectedTable"
+                           asp-route-page="1"
+                           asp-route-pageSize="@Model.PageSize"
+                           asp-route-sortColumn="@Model.SortColumn"
+                           asp-route-sortDirection="@Model.SortDirection">
+                            1
+                        </a>
+                    </li>
+
+                    @if (paginationStart > 2)
+                    {
+                        <li class="page-item disabled" aria-hidden="true">
+                            <span class="page-link">…</span>
+                        </li>
+                    }
+                }
+
+                @for (var pageNumber = paginationStart; pageNumber <= paginationEnd; pageNumber++)
                 {
                     <li class="page-item @(pageNumber == Model.Page ? "active" : "")">
-
                         <a class="page-link"
                            asp-controller="DataExplorer"
                            asp-action="Index"
@@ -480,11 +516,31 @@
                            asp-route-pageSize="@Model.PageSize"
                            asp-route-sortColumn="@Model.SortColumn"
                            asp-route-sortDirection="@Model.SortDirection">
-
                             @pageNumber
-
                         </a>
+                    </li>
+                }
 
+                @if (paginationEnd < Model.TotalPages)
+                {
+                    @if (paginationEnd < Model.TotalPages - 1)
+                    {
+                        <li class="page-item disabled" aria-hidden="true">
+                            <span class="page-link">…</span>
+                        </li>
+                    }
+
+                    <li class="page-item">
+                        <a class="page-link"
+                           asp-controller="DataExplorer"
+                           asp-action="Index"
+                           asp-route-table="@Model.SelectedTable"
+                           asp-route-page="@Model.TotalPages"
+                           asp-route-pageSize="@Model.PageSize"
+                           asp-route-sortColumn="@Model.SortColumn"
+                           asp-route-sortDirection="@Model.SortDirection">
+                            @Model.TotalPages
+                        </a>
                     </li>
                 }
 

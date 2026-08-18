@@ -56,9 +56,24 @@
 
             <div class="card-body">
 
-                <div class="table-responsive">
+                <div class="table-responsive history-table-wrapper">
 
-                    <table class="table table-bordered table-striped align-middle">
+                    <table class="table table-bordered table-striped align-middle history-table">
+
+                        <colgroup>
+                            <col class="history-col-date" />
+                            <col class="history-col-question" />
+                            <col class="history-col-mode" />
+                            <col class="history-col-number" />
+                            <col class="history-col-number" />
+                            <col class="history-col-number" />
+                            <col class="history-col-attempts" />
+                            <col class="history-col-time" />
+                            <col class="history-col-action" />
+                            <col class="history-col-action" />
+                            <col class="history-col-status" />
+                            <col class="history-col-details" />
+                        </colgroup>
 
                         <thead class="table-dark">
 
@@ -131,12 +146,12 @@
 
                                     <td class="text-nowrap">
 
-                                        @(execution.CreatedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm:ss"))
+                                        @ToIndiaTime(execution.CreatedAt).ToString("dd MMM yyyy HH:mm:ss 'IST'")
 
                                     </td>
 
 
-                                    <td style="min-width: 300px;">
+                                    <td class="history-question">
 
                                         @execution.Question
 
@@ -316,3 +331,86 @@
     }
 
 </div>
+
+@functions {
+
+    private static DateTime ToIndiaTime(DateTime value)
+    {
+        var utcValue = value.Kind == DateTimeKind.Utc
+            ? value
+            : DateTime.SpecifyKind(value, DateTimeKind.Utc);
+
+        TimeZoneInfo indiaTimeZone;
+
+        try
+        {
+            // Windows time-zone ID (local development).
+            indiaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
+        }
+        catch (TimeZoneNotFoundException)
+        {
+            // IANA time-zone ID (Linux/Azure Container Apps).
+            indiaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Kolkata");
+        }
+
+        return TimeZoneInfo.ConvertTimeFromUtc(utcValue, indiaTimeZone);
+    }
+
+}
+
+<style>
+    /* Keep the history grid inside the page without an ugly visible horizontal scrollbar. */
+    .history-table-wrapper {
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .history-table-wrapper::-webkit-scrollbar {
+        display: none;
+    }
+
+    .history-table {
+        width: 100%;
+        table-layout: fixed;
+        font-size: 0.84rem;
+    }
+
+    .history-table th,
+    .history-table td {
+        vertical-align: middle;
+    }
+
+    .history-table td {
+        overflow-wrap: anywhere;
+    }
+
+    .history-table th {
+        white-space: nowrap;
+    }
+
+    .history-question {
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .history-col-date { width: 11%; }
+    .history-col-question { width: 21%; }
+    .history-col-mode { width: 8%; }
+    .history-col-number { width: 6%; }
+    .history-col-attempts { width: 6%; }
+    .history-col-time { width: 8%; }
+    .history-col-action { width: 9%; }
+    .history-col-status { width: 6%; }
+    .history-col-details { width: 7%; }
+
+    .history-table .btn {
+        white-space: nowrap;
+        font-size: 0.75rem;
+    }
+
+    @media (max-width: 1100px) {
+        .history-table {
+            min-width: 1050px;
+        }
+    }
+</style>
