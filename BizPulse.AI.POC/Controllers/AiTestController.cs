@@ -32,6 +32,14 @@ public class AiTestController : Controller
         return _configuration.GetValue<bool>("AI:Enabled");
     }
 
+    private static bool IsStrictSqlMode(string mode)
+    {
+        return string.Equals(
+            mode,
+            "StrictSql",
+            StringComparison.OrdinalIgnoreCase);
+    }
+
     [HttpGet]
     public IActionResult Index()
     {
@@ -279,7 +287,8 @@ public class AiTestController : Controller
         string prompt,
         AiProvider provider,
         bool think,
-        CancellationToken cancellationToken)
+        string mode = "StrictSql",
+        CancellationToken cancellationToken = default)
     {
         if (!IsAiEnabled())
         {
@@ -292,6 +301,9 @@ public class AiTestController : Controller
         }
 
         ViewBag.AiEnabled = true;
+        ViewBag.Mode = mode;
+        ViewBag.ThinkEnabled = think;
+
         if (string.IsNullOrWhiteSpace(prompt))
         {
             return BadRequest("Please enter a question.");
@@ -299,6 +311,56 @@ public class AiTestController : Controller
 
         var totalStopwatch =
             System.Diagnostics.Stopwatch.StartNew();
+
+        // ---------------------------------------------------------
+        // General Conversation mode
+        // ---------------------------------------------------------
+        // This branch intentionally does NOT generate SQL and does NOT
+        // execute anything against PostgreSQL.
+        if (!IsStrictSqlMode(mode))
+        {
+            try
+            {
+                var conversationResult =
+                    await _sqlGenerationService.GenerateConversationAsync(
+                        prompt,
+                        provider,
+                        think,
+                        cancellationToken);
+
+                totalStopwatch.Stop();
+
+                ViewBag.Prompt = prompt;
+                ViewBag.Mode = "Conversation";
+                ViewBag.ConversationResponse = conversationResult.Content;
+
+                ViewBag.InputTokens = conversationResult.InputTokens;
+                ViewBag.OutputTokens = conversationResult.OutputTokens;
+                ViewBag.TotalTokens = conversationResult.TotalTokens;
+                ViewBag.ReasoningTokens = conversationResult.ReasoningTokens;
+                ViewBag.Reasoning = conversationResult.Reasoning;
+                ViewBag.Provider = conversationResult.Provider;
+                ViewBag.Model = conversationResult.Model;
+                ViewBag.TotalProcessingTimeSeconds =
+                    totalStopwatch.Elapsed.TotalSeconds;
+
+                // Conversation responses are intentionally not sent through
+                // the SQL execution/correction pipeline.
+                return View("Index");
+            }
+            catch (Exception ex)
+            {
+                totalStopwatch.Stop();
+
+                ViewBag.Prompt = prompt;
+                ViewBag.Mode = "Conversation";
+                ViewBag.Error = ex.Message;
+                ViewBag.TotalProcessingTimeSeconds =
+                    totalStopwatch.Elapsed.TotalSeconds;
+
+                return View("Index");
+            }
+        }
 
         SqlExecutionResult? executionResult = null;
 

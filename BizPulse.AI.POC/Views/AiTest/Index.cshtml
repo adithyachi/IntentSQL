@@ -274,6 +274,39 @@
                         </div>
 
 
+                        <div class="mb-4 p-3 border rounded bg-light">
+                            <div class="fw-semibold mb-2">Mode</div>
+                            <div class="d-flex flex-wrap gap-4">
+                                <div class="form-check">
+                                    <input class="form-check-input"
+                                           type="radio"
+                                           name="mode"
+                                           id="strictSqlMode"
+                                           value="StrictSql"
+                                           @(ViewBag.Mode == null || ViewBag.Mode == "StrictSql" ? "checked" : "") />
+                                    <label class="form-check-label" for="strictSqlMode">
+                                        Strict SQL
+                                    </label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input"
+                                           type="radio"
+                                           name="mode"
+                                           id="conversationMode"
+                                           value="Conversation"
+                                           @(ViewBag.Mode == "Conversation" ? "checked" : "") />
+                                    <label class="form-check-label" for="conversationMode">
+                                        General Conversation
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="small text-muted mt-2">
+                                Strict SQL queries the business database. General Conversation answers normally without executing SQL.
+                            </div>
+                        </div>
+
+
                         <div class="d-flex align-items-center justify-content-between mb-4 p-3 border rounded bg-light">
                             <div>
                                 <div class="fw-semibold">Think / Reasoning</div>
@@ -417,6 +450,22 @@
             }*@
 
 
+            @if (!string.IsNullOrWhiteSpace(ViewBag.ConversationResponse as string))
+            {
+                <div id="conversationSection" class="mt-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h3 class="mb-0">IntentSQL Response</h3>
+                    </div>
+
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <div style="white-space: pre-wrap;">@ViewBag.ConversationResponse</div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+
             @* ====================================================
             ERROR
             ==================================================== *@
@@ -532,7 +581,7 @@
             SQL GENERATION ATTEMPTS
             ==================================================== *@
 
-            @if (attempts != null)
+            @if (ViewBag.Mode != "Conversation" && attempts != null)
             {
                 <div id="attemptsSection"
                      class="mt-4">
@@ -669,7 +718,7 @@
             }
 
 
-            @if (ViewBag.Sql != null)
+            @if (ViewBag.Mode != "Conversation" && ViewBag.Sql != null)
             {
                 <div id="sqlSection"
                      class="mt-4">
@@ -713,7 +762,7 @@
             QUERY RESULTS
             ==================================================== *@
 
-            @if (results != null)
+            @if (ViewBag.Mode != "Conversation" && results != null)
             {
                 <div id="resultsSection"
                      class="mt-4">

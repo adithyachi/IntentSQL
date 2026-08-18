@@ -109,6 +109,64 @@ public class SqlGenerationService
         };
     }
 
+    public async Task<AiGenerationResult> GenerateConversationAsync(
+        string question,
+        AiProvider provider,
+        bool thinkEnabled = false,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(question))
+        {
+            throw new ArgumentException(
+                "A conversation message is required.",
+                nameof(question));
+        }
+
+        var prompt = BuildConversationPrompt(question);
+
+        var aiService = GetAiService(provider);
+
+        return await aiService.GenerateAsync(
+            prompt,
+            thinkEnabled,
+            cancellationToken);
+    }
+
+    private static string BuildConversationPrompt(string question)
+    {
+        return $"""
+        You are IntentSQL, an AI assistant for a business intelligence application.
+
+        GENERAL CONVERSATION MODE
+        ==========================
+
+        The user is having a normal conversation with the assistant.
+
+        Your job is to respond naturally and helpfully to the user's message.
+
+        IMPORTANT RULES
+        ==============
+
+        - This is NOT SQL generation mode.
+        - Do NOT generate SQL.
+        - Do NOT generate PostgreSQL statements.
+        - Do NOT execute or suggest database queries.
+        - Do NOT pretend to have database results.
+        - Answer the user's conversational question directly.
+        - Be concise and clear.
+        - If the user asks about IntentSQL, explain that IntentSQL can answer
+          business-data questions using its SQL mode.
+        - If the user asks a business-data question while in conversation mode,
+          explain that they should switch to Strict SQL mode for a database-backed
+          answer.
+
+        USER MESSAGE
+        ============
+
+        {question}
+        """;
+    }
+
     private static string BuildGenerationPrompt(
         string question,
         string schema)
