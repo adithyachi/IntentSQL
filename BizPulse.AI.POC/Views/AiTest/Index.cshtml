@@ -277,7 +277,7 @@
                         <div class="d-flex align-items-center justify-content-between mb-4 p-3 border rounded bg-light">
                             <div>
                                 <div class="fw-semibold">Think / Reasoning</div>
-                                <div class="small text-muted">Enable Qwen reasoning and save it with this execution.</div>
+                                <div class="small text-muted">Enable reasoning capability and save it with this execution.</div>
                             </div>
                             <div class="form-check form-switch fs-5 mb-0">
                                 <input class="form-check-input" type="checkbox" role="switch" id="thinkToggle" name="think" value="true" @(ViewBag.ThinkEnabled == true ? "checked" : "") />
@@ -645,7 +645,7 @@
                     <div class="card-body d-flex justify-content-between align-items-center">
                         <div>
                             <div class="fw-semibold">Reasoning captured</div>
-                            <div class="small text-muted">Qwen reasoning was captured for this execution.</div>
+                            <div class="small text-muted">Reasoning Details are captured for this execution.</div>
                         </div>
                         <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#reasoningModal">
                             Show Reasoning
@@ -657,7 +657,7 @@
                     <div class="modal-dialog modal-xl modal-dialog-scrollable">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="reasoningModalLabel">Qwen Reasoning</h5>
+                                <h5 class="modal-title" id="reasoningModalLabel">Reasoning Details</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
