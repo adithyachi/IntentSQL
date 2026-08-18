@@ -72,6 +72,10 @@
                                     Question
                                 </th>
 
+                                <th>
+                                    Mode
+                                </th>
+
 @*                                 <th>
                                     Provider
                                 </th>
@@ -94,6 +98,10 @@
 
                                 <th>
                                     Attempts
+                                </th>
+
+                                <th>
+                                    Response Time
                                 </th>
 
                                 <th>
@@ -132,6 +140,18 @@
 
                                         @execution.Question
 
+                                    </td>
+
+
+                                    <td class="text-center text-nowrap">
+                                        @if (execution.Mode == "Conversation")
+                                        {
+                                            <span class="badge bg-info text-dark">Conversation</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-primary">Strict SQL</span>
+                                        }
                                     </td>
 
 
@@ -198,6 +218,34 @@
 
                                         @((execution.ResponseTimeMs / 1000.0).ToString("F2")) s
 
+                                    </td>
+
+
+                                    <td class="text-center">
+                                        @if (!string.IsNullOrWhiteSpace(execution.Response))
+                                        {
+                                            <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#responseModal-@execution.Id">
+                                                View Response
+                                            </button>
+
+                                            <div class="modal fade" id="responseModal-@execution.Id" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title">Response — @execution.Mode</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body text-start">
+                                                            <pre class="mb-0" style="white-space: pre-wrap; font-family: inherit;">@execution.Response</pre>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">None</span>
+                                        }
                                     </td>
 
 

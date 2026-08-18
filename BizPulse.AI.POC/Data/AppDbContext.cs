@@ -132,6 +132,12 @@ public class AppDbContext : DbContext
             entity.Property(x => x.Question)
                 .IsRequired();
 
+            entity.Property(x => x.Mode)
+                .HasMaxLength(30)
+                .IsRequired();
+
+            entity.Property(x => x.Response);
+
             entity.Property(x => x.Reasoning);
 
             entity.Property(x => x.Provider)

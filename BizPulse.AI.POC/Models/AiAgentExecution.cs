@@ -6,6 +6,10 @@ public class AiAgentExecution
 
     public string Question { get; set; } = string.Empty;
 
+    public string Mode { get; set; } = string.Empty;
+
+    public string? Response { get; set; }
+
     public bool ThinkEnabled { get; set; }
 
     public string? Reasoning { get; set; }

@@ -3,6 +3,7 @@ using BizPulse.AI.POC.Models;
 using BizPulse.AI.POC.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace BizPulse.AI.POC.Controllers;
 
@@ -344,6 +345,13 @@ public class AiTestController : Controller
                 ViewBag.TotalProcessingTimeSeconds =
                     totalStopwatch.Elapsed.TotalSeconds;
 
+                await SaveConversationExecutionHistoryAsync(
+                    prompt,
+                    think,
+                    conversationResult,
+                    totalStopwatch.ElapsedMilliseconds,
+                    cancellationToken);
+
                 // Conversation responses are intentionally not sent through
                 // the SQL execution/correction pipeline.
                 return View("Index");
@@ -520,6 +528,10 @@ public class AiTestController : Controller
             {
                 Question = question,
 
+                Mode = "Strict SQL",
+
+                Response = BuildSqlResponse(executionResult.Results),
+
                 ThinkEnabled = thinkEnabled,
 
                 Reasoning =
@@ -602,6 +614,51 @@ public class AiTestController : Controller
             cancellationToken);
     }
 
+    private async Task SaveConversationExecutionHistoryAsync(
+        string question,
+        bool thinkEnabled,
+        AiGenerationResult result,
+        long totalProcessingTimeMs,
+        CancellationToken cancellationToken)
+    {
+        var execution = new AiAgentExecution
+        {
+            Question = question,
+            Mode = "Conversation",
+            Response = result.Content,
+            ThinkEnabled = thinkEnabled,
+            Reasoning = result.Reasoning,
+            Provider = result.Provider,
+            Model = result.Model,
+            InputTokens = result.InputTokens,
+            OutputTokens = result.OutputTokens,
+            TotalTokens = result.TotalTokens,
+            ReasoningTokens = result.ReasoningTokens,
+            ResponseTimeMs = result.ResponseTimeMs,
+            TotalProcessingTimeMs = totalProcessingTimeMs,
+            Success = true,
+            FinalSql = null,
+            Error = null,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _dbContext.AiAgentExecutions.Add(execution);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private static string? BuildSqlResponse(
+        IReadOnlyList<Dictionary<string, object?>> results)
+    {
+        if (results == null || results.Count == 0)
+        {
+            return "The query returned no results.";
+        }
+
+        return JsonSerializer.Serialize(
+            results,
+            new JsonSerializerOptions { WriteIndented = true });
+    }
+
     private static string? BuildCombinedReasoning(
         IReadOnlyList<AiGenerationResult> generations)
     {
@@ -630,6 +687,12 @@ public class AiTestController : Controller
             {
                 Question =
                     question,
+
+                Mode =
+                    "Strict SQL",
+
+                Response =
+                    null,
 
                 ThinkEnabled =
                     thinkEnabled,

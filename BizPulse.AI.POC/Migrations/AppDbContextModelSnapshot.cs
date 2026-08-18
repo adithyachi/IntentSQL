@@ -79,6 +79,11 @@ namespace BizPulse.AI.POC.Migrations
                     b.Property<int>("InputTokens")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Mode")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
                     b.Property<string>("Model")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -97,6 +102,9 @@ namespace BizPulse.AI.POC.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Reasoning")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Response")
                         .HasColumnType("text");
 
                     b.Property<int>("ReasoningTokens")
