@@ -18,23 +18,18 @@
             </p>
         </div>
 
-
         <div class="d-flex align-items-center gap-2">
 
             <a asp-controller="AiHistory"
                asp-action="Index"
                class="btn btn-outline-secondary">
-
                 ↻ Refresh
-
             </a>
 
             <a asp-controller="AiTest"
                asp-action="Ask"
                class="btn btn-primary">
-
                 Ask IntentSQL
-
             </a>
 
         </div>
@@ -45,34 +40,40 @@
     @if (Model.Count == 0)
     {
         <div class="alert alert-info">
-
             No AI executions have been recorded yet.
-
         </div>
     }
     else
     {
         <div class="card">
 
-            <div class="card-body">
+            <div class="card-body history-card-body">
 
-                <div class="table-responsive history-table-wrapper">
+                <div class="history-table-wrapper">
 
                     <table class="table table-bordered table-striped align-middle history-table">
 
                         <colgroup>
-                            <col class="history-col-date" />
-                            <col class="history-col-question" />
-                            <col class="history-col-mode" />
-                            <col class="history-col-number" />
-                            <col class="history-col-number" />
-                            <col class="history-col-number" />
-                            <col class="history-col-time" />
-                            <col class="history-col-action" />
-                            <col class="history-col-action" />
-                            <col class="history-col-status" />
-                            <col class="history-col-details" />
+
+                            <col class="col-date" />
+                            <col class="col-question" />
+                            <col class="col-mode" />
+
+                            <col class="col-token" />
+                            <col class="col-token" />
+                            <col class="col-token" />
+
+                            <col class="col-response-time" />
+
+                            <col class="col-action" />
+                            <col class="col-action" />
+
+                            <col class="col-status" />
+
+                            <col class="col-details" />
+
                         </colgroup>
+
 
                         <thead class="table-dark">
 
@@ -90,48 +91,42 @@
                                     Mode
                                 </th>
 
-                                @*<th>
-                            Provider
-                            </th>
-
-                            <th>
-                            Model
-                            </th> *@
-
-                                <th>
+                                <th class="text-center">
                                     Input
                                 </th>
 
-                                <th>
+                                <th class="text-center">
                                     Output
                                 </th>
 
-                                <th>
+                                <th class="text-center">
                                     Total
                                 </th>
 
-                                <th>
+                                <th class="text-center">
                                     Response
                                 </th>
 
-                                <th>
-                                    View
+                                <th class="text-center">
+                                    Response
                                 </th>
 
-                                <th>
+                                <th class="text-center">
                                     Reasoning
                                 </th>
 
-                                <th>
+                                <th class="text-center">
                                     Status
                                 </th>
 
-                                <th>
+                                <th class="text-center">
+                                    Details
                                 </th>
 
                             </tr>
 
                         </thead>
+
 
                         <tbody>
 
@@ -139,12 +134,16 @@
                             {
                                 <tr>
 
-                                    <td class="text-nowrap">
+                                    <!-- DATE -->
 
-                                        @ToIndiaTime(execution.CreatedAt).ToString("dd MMM yyyy HH:mm:ss 'IST'")
+                                    <td class="history-date">
+
+                                        @(ToIndiaTime(execution.CreatedAt).ToString("dd MMM yyyy HH:mm:ss"))
 
                                     </td>
 
+
+                                    <!-- QUESTION -->
 
                                     <td class="history-question">
 
@@ -153,131 +152,162 @@
                                     </td>
 
 
-                                    <td class="text-center text-nowrap">
+                                    <!-- MODE -->
+
+                                    <td class="text-center">
+
                                         @if (execution.Mode == "Conversation")
                                         {
-                                            <span class="badge bg-info text-dark">Conversation</span>
+                                            <span class="badge bg-info text-dark history-mode-badge">
+                                                Conversation
+                                            </span>
                                         }
                                         else
                                         {
-                                            <span class="badge bg-primary">Strict SQL</span>
+                                            <span class="badge bg-primary history-mode-badge">
+                                                Strict SQL
+                                            </span>
                                         }
+
                                     </td>
 
 
-                                    @*                                     <td>
+                                    <!-- INPUT TOKENS -->
 
-                            @if (execution.Provider == "TogetherAI")
-                            {
-                            <span class="badge bg-primary">
-                            Cloud
-                            </span>
-                            }
-                            else
-                            {
-                            <span class="badge bg-secondary">
-                            Local
-                            </span>
-                            }
-
-                            <div class="small text-muted mt-1">
-                            @execution.Provider
-                            </div>
-
-                            </td> *@
-
-
-                                    @*                                     <td>
-
-                            <span class="small">
-                            @execution.Model
-                            </span>
-
-                            </td> *@
-
-
-                                    <td class="text-end">
+                                    <td class="text-end history-number">
 
                                         @execution.InputTokens.ToString("N0")
 
                                     </td>
 
 
-                                    <td class="text-end">
+                                    <!-- OUTPUT TOKENS -->
+
+                                    <td class="text-end history-number">
 
                                         @execution.OutputTokens.ToString("N0")
 
                                     </td>
 
 
-                                    <td class="text-end fw-bold">
+                                    <!-- TOTAL TOKENS -->
+
+                                    <td class="text-end history-number fw-bold">
 
                                         @execution.TotalTokens.ToString("N0")
 
                                     </td>
 
 
+                                    <!-- RESPONSE TIME -->
 
-                                    <td class="text-end text-nowrap">
+                                    <td class="text-center history-response-time">
 
                                         @((execution.ResponseTimeMs / 1000.0).ToString("F2")) s
 
                                     </td>
 
 
-                                    <td class="text-center">
+                                    <!-- RESPONSE -->
+
+                                    <td class="text-center history-action-cell">
+
                                         @if (!string.IsNullOrWhiteSpace(execution.Response))
                                         {
-                                            <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#responseModal-@execution.Id">
-                                                View Response
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-success history-action-btn"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#responseModal-@execution.Id">
+
+                                                Response
+
                                             </button>
 
-                                            <div class="modal fade" id="responseModal-@execution.Id" tabindex="-1" aria-hidden="true">
+
+                                            <div class="modal fade"
+                                                 id="responseModal-@execution.Id"
+                                                 tabindex="-1"
+                                                 aria-hidden="true">
+
                                                 <div class="modal-dialog modal-xl modal-dialog-scrollable">
+
                                                     <div class="modal-content">
+
                                                         <div class="modal-header">
-                                                            <h5 class="modal-title">Response — @execution.Mode</h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+                                                            <h5 class="modal-title">
+                                                                Response — @execution.Mode
+                                                            </h5>
+
+                                                            <button type="button"
+                                                                    class="btn-close"
+                                                                    data-bs-dismiss="modal"
+                                                                    aria-label="Close">
+                                                            </button>
+
                                                         </div>
+
                                                         <div class="modal-body text-start">
-                                                            <pre class="mb-0" style="white-space: pre-wrap; font-family: inherit;">@execution.Response</pre>
+
+                                                            <pre class="mb-0 history-modal-response">@execution.Response</pre>
+
                                                         </div>
+
                                                     </div>
+
                                                 </div>
+
                                             </div>
                                         }
                                         else
                                         {
-                                            <span class="text-muted small">None</span>
+                                            <span class="text-muted small">
+                                                None
+                                            </span>
                                         }
+
                                     </td>
 
 
-                                    <td class="text-center">
+                                    <!-- REASONING -->
+
+                                    <td class="text-center history-action-cell">
+
                                         @if (!string.IsNullOrWhiteSpace(execution.Reasoning))
                                         {
-                                            <a asp-controller="AiHistory" asp-action="Details" asp-route-id="@execution.Id" asp-fragment="reasoning" class="btn btn-sm btn-outline-primary">
-                                                Show Reasoning
+                                            <a asp-controller="AiHistory"
+                                               asp-action="Details"
+                                               asp-route-id="@execution.Id"
+                                               asp-fragment="reasoning"
+                                               class="btn btn-sm btn-outline-primary history-action-btn">
+
+                                                Reasoning
+
                                             </a>
                                         }
                                         else
                                         {
-                                            <span class="text-muted small">None</span>
+                                            <span class="text-muted small">
+                                                None
+                                            </span>
                                         }
+
                                     </td>
 
 
-                                    <td class="text-center">
+                                    <!-- STATUS -->
+
+                                    <td class="text-center history-status-cell">
 
                                         @if (execution.Success)
                                         {
-                                            <span class="badge bg-success">
+                                            <span class="badge bg-success history-status-badge">
                                                 Success
                                             </span>
                                         }
                                         else
                                         {
-                                            <span class="badge bg-danger">
+                                            <span class="badge bg-danger history-status-badge">
                                                 Failed
                                             </span>
                                         }
@@ -285,12 +315,14 @@
                                     </td>
 
 
-                                    <td>
+                                    <!-- DETAILS -->
+
+                                    <td class="text-center history-action-cell">
 
                                         <a asp-controller="AiHistory"
                                            asp-action="Details"
                                            asp-route-id="@execution.Id"
-                                           class="btn btn-sm btn-outline-primary">
+                                           class="btn btn-sm btn-outline-primary history-action-btn">
 
                                             Details
 
@@ -321,6 +353,7 @@
 
 </div>
 
+
 @functions {
 
     private static DateTime ToIndiaTime(DateTime value)
@@ -333,37 +366,118 @@
 
         try
         {
-            // Windows time-zone ID (local development).
-            indiaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
+            // Windows / local development.
+            indiaTimeZone =
+                TimeZoneInfo.FindSystemTimeZoneById(
+                    "India Standard Time");
         }
         catch (TimeZoneNotFoundException)
         {
-            // IANA time-zone ID (Linux/Azure Container Apps).
-            indiaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Kolkata");
+            // Linux / Azure Container Apps.
+            indiaTimeZone =
+                TimeZoneInfo.FindSystemTimeZoneById(
+                    "Asia/Kolkata");
         }
 
-        return TimeZoneInfo.ConvertTimeFromUtc(utcValue, indiaTimeZone);
+        return TimeZoneInfo.ConvertTimeFromUtc(
+            utcValue,
+            indiaTimeZone);
     }
 
 }
 
+
 <style>
+
     /*
-           AI History table:
-           Keep every column contained inside its own cell.
-           The question column gets the most room; action columns remain readable.
-        */
+         * ============================================================
+         * AI HISTORY TABLE
+         * ============================================================
+         *
+         * Important:
+         * - No horizontal scrolling.
+         * - Fixed layout with carefully balanced column widths.
+         * - Action buttons use short labels.
+         * - Question gets the largest amount of space.
+         * - Response time and status have dedicated space.
+         */
+
+    .history-card-body {
+        padding: 1rem;
+    }
+
+
     .history-table-wrapper {
         width: 100%;
         overflow-x: hidden;
     }
 
+
     .history-table {
         width: 100%;
-        table-layout: fixed;
-        font-size: 0.82rem;
+        max-width: 100%;
         margin-bottom: 0;
+        table-layout: fixed;
+        font-size: 0.80rem;
     }
+
+
+        /*
+         * ------------------------------------------------------------
+         * COLUMN WIDTHS
+         * ------------------------------------------------------------
+         *
+         * Total = 100%
+         *
+         * Date          12%
+         * Question      25%
+         * Mode           8%
+         * Tokens        15%
+         * Response time  7%
+         * Response       8%
+         * Reasoning      8%
+         * Status         6%
+         * Details        6%
+         */
+
+        .history-table .col-date {
+            width: 12%;
+        }
+
+        .history-table .col-question {
+            width: 25%;
+        }
+
+        .history-table .col-mode {
+            width: 8%;
+        }
+
+        .history-table .col-token {
+            width: 5%;
+        }
+
+        .history-table .col-response-time {
+            width: 7%;
+        }
+
+        .history-table .col-action {
+            width: 8%;
+        }
+
+        .history-table .col-status {
+            width: 6%;
+        }
+
+        .history-table .col-details {
+            width: 6%;
+        }
+
+
+        /*
+         * ------------------------------------------------------------
+         * CELLS
+         * ------------------------------------------------------------
+         */
 
         .history-table th,
         .history-table td {
@@ -373,100 +487,251 @@
             overflow: hidden;
         }
 
+
         .history-table th {
-            white-space: nowrap;
+            padding: 0.55rem 0.35rem;
+            white-space: normal;
             line-height: 1.15;
-            font-size: 0.78rem;
+            font-size: 0.75rem;
+            text-align: center;
         }
+
 
         .history-table td {
+            padding: 0.55rem 0.35rem;
             white-space: normal;
-            overflow-wrap: break-word;
+            overflow-wrap: anywhere;
             word-break: normal;
+            line-height: 1.25;
         }
 
-    .history-question {
-        white-space: normal !important;
-        overflow-wrap: break-word;
-        word-break: normal;
-    }
 
-    .history-table td.text-nowrap {
+    /*
+         * ------------------------------------------------------------
+         * DATE
+         * ------------------------------------------------------------
+         */
+
+    .history-date {
         white-space: nowrap !important;
+        font-size: 0.72rem;
+        overflow: hidden;
         text-overflow: clip;
     }
 
-    /* 11 visible columns = 100%. */
-    .history-col-date {
-        width: 13%;
+
+    /*
+         * ------------------------------------------------------------
+         * QUESTION
+         * ------------------------------------------------------------
+         */
+
+    .history-question {
+        white-space: normal !important;
+        overflow-wrap: anywhere;
+        word-break: normal;
+        line-height: 1.3;
     }
 
-    .history-col-question {
-        width: 24%;
+
+    /*
+         * ------------------------------------------------------------
+         * MODE
+         * ------------------------------------------------------------
+         */
+
+    .history-mode-badge {
+        display: inline-block;
+        max-width: 100%;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        line-height: 1.15;
+        padding: 0.3rem 0.35rem;
+        font-size: 0.68rem;
     }
 
-    .history-col-mode {
-        width: 8%;
+
+    /*
+         * ------------------------------------------------------------
+         * TOKEN VALUES
+         * ------------------------------------------------------------
+         */
+
+    .history-number {
+        white-space: nowrap !important;
+        font-size: 0.75rem;
     }
 
-    .history-col-number {
-        width: 6%;
+
+    /*
+         * ------------------------------------------------------------
+         * RESPONSE TIME
+         * ------------------------------------------------------------
+         */
+
+    .history-response-time {
+        white-space: nowrap !important;
+        font-size: 0.73rem;
     }
 
-    .history-col-time {
-        width: 9%;
+
+    /*
+         * ------------------------------------------------------------
+         * ACTION CELLS
+         * ------------------------------------------------------------
+         */
+
+    .history-action-cell {
+        padding-left: 0.25rem !important;
+        padding-right: 0.25rem !important;
     }
 
-    .history-col-action {
-        width: 8%;
-    }
 
-    .history-col-status {
-        width: 5%;
-    }
-
-    .history-col-details {
-        width: 7%;
-    }
-
-    /* Response / Reasoning / Details buttons stay inside their own cells. */
-    .history-table td .btn {
-        display: block;
+    .history-action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         width: 100%;
         max-width: 100%;
         min-width: 0;
         box-sizing: border-box;
         white-space: normal;
-        overflow-wrap: break-word;
+        overflow-wrap: anywhere;
         word-break: normal;
         text-align: center;
-        line-height: 1.15;
-        font-size: 0.72rem;
-        padding: 0.3rem 0.25rem;
+        line-height: 1.1;
+        font-size: 0.68rem;
+        padding: 0.35rem 0.20rem;
         margin: 0;
     }
 
-    .history-table .badge {
-        display: inline-block;
-        max-width: 100%;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: clip;
-        line-height: 1.15;
+
+    /*
+         * ------------------------------------------------------------
+         * STATUS
+         * ------------------------------------------------------------
+         */
+
+    .history-status-cell {
+        padding-left: 0.25rem !important;
+        padding-right: 0.25rem !important;
     }
 
-    @@media (max-width: 1100px) {
+
+    .history-status-badge {
+        display: inline-block;
+        max-width: 100%;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: normal;
+        text-align: center;
+        line-height: 1.1;
+        font-size: 0.68rem;
+        padding: 0.35rem 0.25rem;
+    }
+
+
+    /*
+         * ------------------------------------------------------------
+         * RESPONSE MODAL
+         * ------------------------------------------------------------
+         */
+
+    .history-modal-response {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        font-family: inherit;
+        max-width: 100%;
+    }
+
+
+    /*
+         * ------------------------------------------------------------
+         * MEDIUM SCREENS
+         * ------------------------------------------------------------
+         */
+
+    @@media (max-width: 1200px) {
+
         .history-table {
             font-size: 0.74rem;
         }
 
             .history-table th {
-                font-size: 0.7rem;
+                font-size: 0.70rem;
             }
 
-            .history-table td .btn {
-                font-size: 0.65rem;
-                padding: 0.25rem 0.2rem;
+            .history-table td {
+                padding: 0.45rem 0.25rem;
             }
+
+        .history-date {
+            font-size: 0.65rem;
+        }
+
+        .history-action-btn {
+            font-size: 0.62rem;
+            padding: 0.3rem 0.15rem;
+        }
+
+        .history-status-badge {
+            font-size: 0.62rem;
+        }
     }
+
+
+    /*
+         * ------------------------------------------------------------
+         * SMALLER SCREENS
+         * ------------------------------------------------------------
+         *
+         * We still don't introduce a horizontal scrollbar.
+         * Text/buttons are allowed to wrap.
+         */
+
+    @@media (max-width: 992px) {
+
+        .history-card-body {
+            padding: 0.5rem;
+        }
+
+        .history-table {
+            font-size: 0.68rem;
+        }
+
+            .history-table th {
+                font-size: 0.64rem;
+            }
+
+            .history-table td {
+                padding: 0.35rem 0.20rem;
+            }
+
+        .history-date {
+            white-space: normal !important;
+            overflow-wrap: anywhere;
+            font-size: 0.60rem;
+        }
+
+        .history-number {
+            font-size: 0.64rem;
+        }
+
+        .history-response-time {
+            white-space: normal !important;
+            font-size: 0.62rem;
+        }
+
+        .history-action-btn {
+            font-size: 0.58rem;
+            padding: 0.25rem 0.10rem;
+        }
+
+        .history-status-badge {
+            font-size: 0.58rem;
+            padding: 0.25rem 0.15rem;
+        }
+    }
+
 </style>
