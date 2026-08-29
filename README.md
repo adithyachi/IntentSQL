@@ -12,7 +12,7 @@
 
 IntentSQL provides a simple interface for exploring relational data using natural language.
 
-![IntentSQL Home](docs/images/01-intentsql-home.png)
+![IntentSQL Home](docs/images/01-intentsql-main.png)
 
 ---
 
@@ -20,7 +20,7 @@ IntentSQL provides a simple interface for exploring relational data using natura
 
 Users can ask analytical questions in natural language. IntentSQL interprets the request and generates the appropriate SQL query.
 
-![Ask Business Question](docs/images/02-ask-business-question.png)
+![Ask Business Question](docs/images/02-ask_business_question.png)
 
 ---
 
@@ -28,7 +28,7 @@ Users can ask analytical questions in natural language. IntentSQL interprets the
 
 Each execution provides visibility into AI processing, including token usage, response time, total processing time, and SQL generation attempts.
 
-![AI Execution Details](docs/images/03-ai-execution-details.png)
+![AI Execution Details](docs/images/03-execution-details.png)
 
 ---
 
@@ -36,7 +36,7 @@ Each execution provides visibility into AI processing, including token usage, re
 
 IntentSQL records SQL generation attempts and displays the generated SQL used to query the relational database and return results.
 
-![Generated SQL and Results](docs/images/04-generated-sql-results.png)
+![Generated SQL and Results](docs/images/04-generated-sql.png)
 
 ---
 
