@@ -8,7 +8,35 @@
 
 ## 📸 IntentSQL in Action
 
-> Screenshots demonstrating the IntentSQL application, generated SQL, and query results will be added here.
+### 1. IntentSQL Overview
+
+IntentSQL provides a simple interface for exploring relational data using natural language.
+
+![IntentSQL Home](docs/images/01-intentsql-home.png)
+
+---
+
+### 2. Ask a Business Question
+
+Users can ask analytical questions in natural language. IntentSQL interprets the request and generates the appropriate SQL query.
+
+![Ask Business Question](docs/images/02-ask-business-question.png)
+
+---
+
+### 3. AI Execution Details & Performance
+
+Each execution provides visibility into AI processing, including token usage, response time, total processing time, and SQL generation attempts.
+
+![AI Execution Details](docs/images/03-ai-execution-details.png)
+
+---
+
+### 4. Generated SQL and Results
+
+IntentSQL records SQL generation attempts and displays the generated SQL used to query the relational database and return results.
+
+![Generated SQL and Results](docs/images/04-generated-sql-results.png)
 
 ---
 
