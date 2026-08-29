@@ -6,9 +6,9 @@ services:
     restart: unless-stopped
 
     environment:
-      POSTGRES_DB: bizpulse
-      POSTGRES_USER: bizpulse
-      POSTGRES_PASSWORD: bizpulse_dev_password
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
     ports:
       - "5432:5432"
